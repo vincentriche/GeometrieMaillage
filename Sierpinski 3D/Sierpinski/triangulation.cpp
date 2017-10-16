@@ -281,18 +281,26 @@ void Triangulation::DelaunayLawson()
 
 	while (isDelaunay == false)
 	{
+		isDelaunay = true;
 		for (int i = 0; i < faces.size(); i++)
 		{
+			Face f = faces[i];
 			for (int j = 0; j < 3; j++)
 			{
-				int localVertex = faces[i].LocalFaceIndex(j);
+				int fB = f.WorldFaceIndex(j);
 
-				if (IsInCircumcircle(i, i) == true)
+				if (fB == -1)
+					continue;
+
+				Face faceB = faces[fB];
+				int localFaceB = faceB.LocalFaceIndex(i);
+
+				int p = faceB.WorldVertexIndex(localFaceB);
+				if (IsInCircumcircle(i, p) > 0.0f)
 				{
-					FlipEdge(i, i);
+					FlipEdge(i, fB);
 					isDelaunay = false;
 				}
-
 			}
 		}
 	}
@@ -331,14 +339,39 @@ void Triangulation::FlipEdge(int fA, int fB)
 {
 	// Flip
 	Face faceA = faces[fA];
-	Face faceB = faces[fB];
+    Face faceB = faces[fB];
+
+    //Les indices locaux des sommets adjacents(voisins) aux faces
 	int sA = faceA.LocalFaceIndex(fB);
 	int sB = faceB.LocalFaceIndex(fA);
+
+    //Voisins de A et B à mettre à jour
+    int iFaceK = faceA.GetFAdjacent((sA + 2) % 3); //Voisin de A
+    int iFaceL = faceB.GetFAdjacent((sB + 2) % 3); //Voisin de B
+    Face faceK = faces[iFaceK];
+    Face faceL = faces[iFaceL];
+
+    //Les indices locaux des sommets voisins dans les triangles
+    int sK = faceK.LocalFaceIndex(fA);
+    int sL = faceL.LocalFaceIndex(fB);
+
+    //Les indices globaux avec la fonction WorldVertexIndex
 	Face nFaceA(faceA.WorldVertexIndex(sA), faceA.WorldVertexIndex((sA + 1) % 3), faceB.WorldVertexIndex(sB));
 	Face nFaceB(faceB.WorldVertexIndex(sB), faceB.WorldVertexIndex((sB + 1) % 3), faceA.WorldVertexIndex(sA));
 
-	// Update Voisins faces
+    //Mise à jour voisin des deux premières faces
+    nFaceA.SetFAdjacent(0,iFaceL);
+    nFaceA.SetFAdjacent(1,faceA.GetFAdjacent(1));
+    nFaceA.SetFAdjacent(2,faceA.GetFAdjacent(2));
+    nFaceB.SetFAdjacent(0,iFaceK);
+    nFaceB.SetFAdjacent(1,faceB.GetFAdjacent(1));
+    nFaceB.SetFAdjacent(2,faceB.GetFAdjacent(2));
 
+	// Update Voisins faces
+    faceK.SetFAdjacent(sK,fB);
+    faceL.SetFAdjacent(sL,fA);
+    faces[fA] = nFaceA;
+    faces[fB] = nFaceB;
 
 	// Update Voisins faces voisines
 }

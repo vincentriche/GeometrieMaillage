@@ -13,6 +13,7 @@ Triangulation::Triangulation()
 	renderMode = GL_LINES;
 
 	TriangulationNaive();
+	DelaunayLawson();
 
 	//GenerateCube();
 	//ReadFile();
@@ -237,7 +238,7 @@ int Triangulation::CreateFace(int iA, int iB, int iC)
 {
 	Vector3 a = vertices[1].p - vertices[0].p;
 	Vector3 b = vertices[2].p - vertices[1].p;
-	Vector3 p = a.CrossProduct(b);
+	Vector3 p = Vector3::CrossProduct(a, b);
 	if (p.getY() > 0.0f)
 		faces.push_back(Face(iA, iB, iC));
 	else
@@ -259,7 +260,7 @@ void Triangulation::AddVertexToConvexHull(int s)
 		if (VertexSideLine(p1, p2, p) > 0.0f)
 		{
 			CreateFace(s1, s, s2);
-			
+
 			/*
 			Circulateur_de_faces circulateur(this, hull[s1]);
 			int vertexA = -1;
@@ -276,25 +277,17 @@ void Triangulation::AddVertexToConvexHull(int s)
 
 void Triangulation::DelaunayLawson()
 {
-	for (int i = 0; i < faces.size(); i++)
+	/*for (int i = 0; i < faces.size(); i++)
 	{
-		Vertex a = vertices[faces[i].GetFAdjacent((0))];
-		Vertex b = vertices[faces[i].GetFAdjacent((1))];
-		Vertex c = vertices[faces[i].GetFAdjacent((2))];
+		Face faceA = faces[faces[i].fA];
+		Face faceB = faces[faces[i].fB];
+		Face faceC = faces[faces[i].fC];
 
-		float bX = (float)(a.p.getX() + b.p.getX() + c.p.getX()) / 3.0f;
-		float bY = (float)(a.p.getY() + b.p.getY() + c.p.getY()) / 3.0f;
-		Vector3 barycenter = Vector3(bX, bY, 0.0f);
-		float radius = (barycenter - a.GetPoint()).Magnitude();
-
-		for (int j = 0; j < vertices.size(); j++)
+		if (IsInCircumcircle(i, i) == false)
 		{
-			if (IsInCircumcircle(barycenter, radius, vertices[j]) == false)
-			{
-				// FlipEdge();
-			}
+			FlipEdge(i, i);
 		}
-	}
+	}*/
 }
 
 void Triangulation::SplitFace(int f, int s)
@@ -319,15 +312,27 @@ void Triangulation::SplitFace(int f, int s)
 	vertices[faces[f2].iB].adjacentFace = f2;
 	vertices[faces[f2].iC].adjacentFace = f2;
 	faces[f2].fA = f;
+	face.fA = f2;
 
 	faces[f1].fC = f2;
 	faces[f2].fB = f1;
 	face.fC = f2;
 }
 
-void Triangulation::FlipEdge()
+void Triangulation::FlipEdge(int fA, int fB)
 {
+	// Flip
+	Face faceA = faces[fA];
+	Face faceB = faces[fB];
+	int sA = faceA.LocalFaceIndex(fB);
+	int sB = faceB.LocalFaceIndex(fA);
+	Face nFaceA(faceA.WorldVertexIndex(sA), faceA.WorldVertexIndex((sA + 1) % 3), faceB.WorldVertexIndex(sB));
+	Face nFaceB(faceB.WorldVertexIndex(sB), faceB.WorldVertexIndex((sB + 1) % 3), faceA.WorldVertexIndex(sA));
 
+	// Update Voisins faces
+	
+
+	// Update Voisins faces voisines
 }
 /* Fonctions utilitaires */
 
@@ -352,11 +357,39 @@ bool Triangulation::IsInFace(Vertex s, Face f)
 	return false;
 }
 
-bool Triangulation::IsInCircumcircle(Vector3 barycenter, float radius, Vertex p)
+bool Triangulation::IsInCircumcircle(int f, int s)
 {
+	Face face = faces[f];
+	Vertex p = vertices[s];
+	Vertex a = vertices[face.GetVIncident((0))];
+	Vertex b = vertices[face.GetVIncident((1))];
+	Vertex c = vertices[face.GetVIncident((2))];
+
+	float bX = (float)(a.p.getX() + b.p.getX() + c.p.getX()) / 3.0f;
+	float bY = (float)(a.p.getY() + b.p.getY() + c.p.getY()) / 3.0f;
+	Vector3 barycenter = Vector3(bX, bY, 0.0f);
+	float radius = Vector3::Magnitude(barycenter - a.GetPoint());
+
 	if (pow(p.p.getX() - barycenter.getX(), 2) + pow(p.p.getY() - barycenter.getY(), 2) < pow(radius, 2))
 		return true;
 	return false;
+}
+
+int Triangulation::FindFace(int s)
+{
+	Vertex p = vertices[s];
+	for (int i = 0; i < faces.size(); i++)
+	{
+		Vertex a = vertices[faces[i].iA];
+		Vertex b = vertices[faces[i].iB];
+		Vertex c = vertices[faces[i].iC];
+
+		if (a.GetPoint() == p.GetPoint() ||
+			b.GetPoint() == p.GetPoint() ||
+			c.GetPoint() == p.GetPoint())
+			return i;
+	}
+	return -1;
 }
 /* Prédicats */
 
@@ -479,13 +512,37 @@ void Face::SetFAdjacent(int index, int vertexID)
 		fC = vertexID;
 }
 
+int Face::WorldVertexIndex(int s)
+{
+	if (s == 0)
+		return iA;
+	else if (s == 1)
+		return iB;
+	else if (s == 2)
+		return iC;
+	else
+		return -1;
+}
+
 int Face::LocalVertexIndex(int s)
 {
-	if (s == fA)
+	if (s == iA)
 		return 0;
-	else if (s == fB)
+	else if (s == iB)
 		return 1;
-	else if (s == fC)
+	else if (s == iC)
+		return 2;
+	else
+		return -1;
+}
+
+int Face::LocalFaceIndex(int f)
+{
+	if (f == fA)
+		return 0;
+	else if (f == fB)
+		return 1;
+	else if (f == fC)
 		return 2;
 	else
 		return -1;

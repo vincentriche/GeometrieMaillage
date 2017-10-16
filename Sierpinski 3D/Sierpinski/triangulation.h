@@ -60,7 +60,9 @@ public:
 	int GetVIncident(int index);
 	int GetFAdjacent(int index);
 	void SetFAdjacent(int index, int vertexID);
+	int WorldVertexIndex(int s);
 	int LocalVertexIndex(int s);
+	int LocalFaceIndex(int s);
 };
 
 class Triangulation
@@ -83,13 +85,14 @@ public:
 	void AddVertexToConvexHull(int s);
 	void DelaunayLawson();
 	void SplitFace(int f, int s);
-	void FlipEdge();
+	void FlipEdge(int f, int s);
 	/* Fonctions utilitaires */
 
 	/* Prédicats */
 	bool IsInFace(Vertex s, Face f);
-	bool IsInCircumcircle(Vector3 barycenter, float radius, Vertex p);
-	float VertexSideLine(Vertex p1, Vertex p2, Vertex p);
+	bool IsInCircumcircle(int f, int s);
+	float VertexSideLine(Vertex p1, Vertex p2, Vertex p); 
+	int FindFace(int s);
 
 
 	/* Surcharges d'opérateurs */

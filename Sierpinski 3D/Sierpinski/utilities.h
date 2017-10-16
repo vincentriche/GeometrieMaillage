@@ -10,12 +10,13 @@ public:
 	Vector3() : x(0.0), y(0.0), z(0.0) {}
 	Vector3(double n) : x(n), y(n), z(n) {}
 	Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
-	Vector3 operator-(const Vector3& a);
-	Vector3 operator+(const Vector3& a);
+	bool operator==(const Vector3& u) const;
+	Vector3 operator-(const Vector3& u) const;
+	Vector3 operator+(const Vector3& u) const;
 
-	float DotProduct(const Vector3& u);
-	Vector3 CrossProduct(const Vector3& u);
-	float Magnitude();
+	static float DotProduct(const Vector3& u, const Vector3& v);
+	static Vector3 CrossProduct(const Vector3& u, const Vector3& v);
+	static float Magnitude(const Vector3& u);
 
 	double getX() { return x; }
 	double getY() { return y; }

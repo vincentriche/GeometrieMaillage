@@ -1,29 +1,34 @@
 #include "utilities.h"
 
-Vector3 Vector3::CrossProduct(const Vector3& u)
+Vector3 Vector3::CrossProduct(const Vector3& u, const Vector3& v)
 {
 	return Vector3(
-		(y * u.z) - (z * u.y),
-		(z * u.x) - (x * u.z),
-		(x * u.y) - (y * u.x));
+		(u.y * v.z) - (u.z * v.y),
+		(u.z * v.x) - (u.x * v.z),
+		(u.x * v.y) - (u.y * v.x));
 }
 
-float Vector3::DotProduct(const Vector3& u)
+float Vector3::DotProduct(const Vector3& u, const Vector3& v)
 {
-	return x * u.x + y * u.y + z * u.z;
+	return u.x * v.x + u.y * v.y + u.z * v.z;
 }
 
-float Vector3::Magnitude()
+float Vector3::Magnitude(const Vector3& u)
 {
-	return x * x + y * y + z * z;
+	return u.x * u.x + u.y * u.y + u.z * u.z;
 }
 
-Vector3 Vector3::operator-(const Vector3& a)
+bool Vector3::operator==(const Vector3& v) const
 {
-	return Vector3(x - a.x, y - a.y, z - a.z);
+	return x == v.x && y == v.y && z == v.z;
 }
 
-Vector3 Vector3::operator+(const Vector3& a)
+Vector3 Vector3::operator-(const Vector3& v) const
 {
-	return Vector3(x + a.x, y + a.y, z + a.z);
+	return Vector3(x - v.x, y - v.y, z - v.z);
+}
+
+Vector3 Vector3::operator+(const Vector3& v) const
+{
+	return Vector3(x + v.x, y + v.y, z + v.z);
 }

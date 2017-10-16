@@ -61,8 +61,9 @@ public:
 	int GetFAdjacent(int index);
 	void SetFAdjacent(int index, int vertexID);
 	int WorldVertexIndex(int s);
+	int WorldFaceIndex(int f);
 	int LocalVertexIndex(int s);
-	int LocalFaceIndex(int s);
+	int LocalFaceIndex(int f);
 };
 
 class Triangulation

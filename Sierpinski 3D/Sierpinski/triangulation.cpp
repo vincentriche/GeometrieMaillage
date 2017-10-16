@@ -277,17 +277,25 @@ void Triangulation::AddVertexToConvexHull(int s)
 
 void Triangulation::DelaunayLawson()
 {
-	/*for (int i = 0; i < faces.size(); i++)
-	{
-		Face faceA = faces[faces[i].fA];
-		Face faceB = faces[faces[i].fB];
-		Face faceC = faces[faces[i].fC];
+	bool isDelaunay = false;
 
-		if (IsInCircumcircle(i, i) == false)
+	while (isDelaunay == false)
+	{
+		for (int i = 0; i < faces.size(); i++)
 		{
-			FlipEdge(i, i);
+			for (int j = 0; j < 3; j++)
+			{
+				int localVertex = faces[i].LocalFaceIndex(j);
+
+				if (IsInCircumcircle(i, i) == true)
+				{
+					FlipEdge(i, i);
+					isDelaunay = false;
+				}
+
+			}
 		}
-	}*/
+	}
 }
 
 void Triangulation::SplitFace(int f, int s)
@@ -330,7 +338,7 @@ void Triangulation::FlipEdge(int fA, int fB)
 	Face nFaceB(faceB.WorldVertexIndex(sB), faceB.WorldVertexIndex((sB + 1) % 3), faceA.WorldVertexIndex(sA));
 
 	// Update Voisins faces
-	
+
 
 	// Update Voisins faces voisines
 }
@@ -357,20 +365,32 @@ bool Triangulation::IsInFace(Vertex s, Face f)
 	return false;
 }
 
-bool Triangulation::IsInCircumcircle(int f, int s)
+bool Triangulation::IsInCircumcircle(int f, int v)
 {
 	Face face = faces[f];
-	Vertex p = vertices[s];
-	Vertex a = vertices[face.GetVIncident((0))];
-	Vertex b = vertices[face.GetVIncident((1))];
-	Vertex c = vertices[face.GetVIncident((2))];
+	Vertex s = vertices[v];
+	Vertex p = vertices[face.GetVIncident((0))];
+	Vertex q = vertices[face.GetVIncident((1))];
+	Vertex r = vertices[face.GetVIncident((2))];
 
-	float bX = (float)(a.p.getX() + b.p.getX() + c.p.getX()) / 3.0f;
-	float bY = (float)(a.p.getY() + b.p.getY() + c.p.getY()) / 3.0f;
-	Vector3 barycenter = Vector3(bX, bY, 0.0f);
-	float radius = Vector3::Magnitude(barycenter - a.GetPoint());
+	float mat[3][3];
+	mat[0][0] = q.p.getX() - p.p.getX();
+	mat[0][1] = r.p.getX() - p.p.getX();
+	mat[0][2] = s.p.getX() - p.p.getX();
 
-	if (pow(p.p.getX() - barycenter.getX(), 2) + pow(p.p.getY() - barycenter.getY(), 2) < pow(radius, 2))
+	mat[1][0] = q.p.getY() - p.p.getY();
+	mat[1][1] = r.p.getY() - p.p.getY();
+	mat[1][2] = s.p.getY() - p.p.getY();
+
+	mat[2][0] = pow(q.p.getY() - p.p.getY(), 2) + pow(q.p.getY() - p.p.getY(), 2);
+	mat[2][1] = pow(r.p.getY() - p.p.getY(), 2) + pow(r.p.getY() - p.p.getY(), 2);
+	mat[2][2] = pow(s.p.getY() - p.p.getY(), 2) + pow(q.p.getY() - p.p.getY(), 2);
+
+	float det = mat[0][0] * ((mat[1][1] * mat[2][2]) - (mat[2][1] * mat[1][2])) -
+		mat[0][1] * (mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) +
+		mat[0][2] * (mat[1][0] * mat[2][1] - mat[2][0] * mat[1][1]);
+
+	if (det > 0.0f)
 		return true;
 	return false;
 }
@@ -520,6 +540,18 @@ int Face::WorldVertexIndex(int s)
 		return iB;
 	else if (s == 2)
 		return iC;
+	else
+		return -1;
+}
+
+int Face::WorldFaceIndex(int f)
+{
+	if (f == 0)
+		return fA;
+	else if (f == 1)
+		return fB;
+	else if (f == 2)
+		return fC;
 	else
 		return -1;
 }

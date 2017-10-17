@@ -33,9 +33,9 @@ void GLDisplay::resizeGL(int w, int h)
 
 	glViewport(0, 0, w, h);
 
-	glOrtho((float)mesh.GetAABB().GetMinAABB().getX(), (float)mesh.GetAABB().GetMaxAABB().getX(),
-			(float)mesh.GetAABB().GetMinAABB().getY(), (float)mesh.GetAABB().GetMaxAABB().getY(),
-			(float)mesh.GetAABB().GetMinAABB().getZ(), (float)mesh.GetAABB().GetMaxAABB().getZ());
+	glOrtho((float)mesh.AABB().GetMinAABB().getX(), (float)mesh.AABB().GetMaxAABB().getX(),
+			(float)mesh.AABB().GetMinAABB().getY(), (float)mesh.AABB().GetMaxAABB().getY(),
+			(float)mesh.AABB().GetMinAABB().getZ(), (float)mesh.AABB().GetMaxAABB().getZ());
 
 	glMatrixMode(GL_MODELVIEW);
 }

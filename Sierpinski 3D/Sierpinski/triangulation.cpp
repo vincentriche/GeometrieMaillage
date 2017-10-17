@@ -13,10 +13,8 @@ Triangulation::Triangulation()
 	renderMode = GL_LINES;
 
 	TriangulationNaive();
-	DelaunayLawson();
+	//DelaunayLawson();
 
-	//GenerateCube();
-	//ReadFile();
 	CalculateBoundingBox();
 }
 
@@ -29,14 +27,14 @@ void Triangulation::draw()
 		{
 			Vector3 color = colors[i % 8];
 			glColor3f(color.getX(), color.getY(), color.getZ());
-			glVertex3f(vertices[faces[i].iA].p.getX(), vertices[faces[i].iA].p.getY(), vertices[faces[i].iA].p.getZ());
-			glVertex3f(vertices[faces[i].iB].p.getX(), vertices[faces[i].iB].p.getY(), vertices[faces[i].iB].p.getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(0)].Point().getX(), vertices[faces[i].VertexIndex(0)].Point().getY(), vertices[faces[i].VertexIndex(0)].Point().getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(1)].Point().getX(), vertices[faces[i].VertexIndex(1)].Point().getY(), vertices[faces[i].VertexIndex(1)].Point().getZ());
 
-			glVertex3f(vertices[faces[i].iB].p.getX(), vertices[faces[i].iB].p.getY(), vertices[faces[i].iB].p.getZ());
-			glVertex3f(vertices[faces[i].iC].p.getX(), vertices[faces[i].iC].p.getY(), vertices[faces[i].iC].p.getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(1)].Point().getX(), vertices[faces[i].VertexIndex(1)].Point().getY(), vertices[faces[i].VertexIndex(1)].Point().getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(2)].Point().getX(), vertices[faces[i].VertexIndex(2)].Point().getY(), vertices[faces[i].VertexIndex(2)].Point().getZ());
 
-			glVertex3f(vertices[faces[i].iC].p.getX(), vertices[faces[i].iC].p.getY(), vertices[faces[i].iC].p.getZ());
-			glVertex3f(vertices[faces[i].iA].p.getX(), vertices[faces[i].iA].p.getY(), vertices[faces[i].iA].p.getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(2)].Point().getX(), vertices[faces[i].VertexIndex(2)].Point().getY(), vertices[faces[i].VertexIndex(2)].Point().getZ());
+			glVertex3f(vertices[faces[i].VertexIndex(0)].Point().getX(), vertices[faces[i].VertexIndex(0)].Point().getY(), vertices[faces[i].VertexIndex(0)].Point().getZ());
 		}
 	}
 	else if (renderMode == GL_TRIANGLES)
@@ -45,9 +43,9 @@ void Triangulation::draw()
 		{
 			Vector3 color = colors[i % 8];
 			glColor3f(color.getX(), color.getY(), color.getZ());
-			glVertex3f(vertices[faces[i].iA].p.getX(), vertices[faces[i].iA].p.getY(), vertices[faces[i].iA].p.getZ());
-			glVertex3f(vertices[faces[i].iB].p.getX(), vertices[faces[i].iB].p.getY(), vertices[faces[i].iB].p.getZ());
-			glVertex3f(vertices[faces[i].iC].p.getX(), vertices[faces[i].iC].p.getY(), vertices[faces[i].iC].p.getZ());
+			glVertex3f(vertices[faces[i].FaceIndex(0)].Point().getX(), vertices[faces[i].FaceIndex(0)].Point().getY(), vertices[faces[i].FaceIndex(0)].Point().getZ());
+			glVertex3f(vertices[faces[i].FaceIndex(1)].Point().getX(), vertices[faces[i].FaceIndex(1)].Point().getY(), vertices[faces[i].FaceIndex(1)].Point().getZ());
+			glVertex3f(vertices[faces[i].FaceIndex(2)].Point().getX(), vertices[faces[i].FaceIndex(2)].Point().getY(), vertices[faces[i].FaceIndex(2)].Point().getZ());
 		}
 	}
 	glEnd();
@@ -85,24 +83,6 @@ void Triangulation::ReadFile()
 			faces.push_back(Face(fields[1].toInt(), fields[2].toInt(), fields[3].toInt()));
 		}
 		inputFile.close();
-	}
-
-	QMap<Edge, EdgeInfo> map;
-	for (int i = 0; i < faces.size(); i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			Edge edge(faces[i].GetVIncident(j), faces[i].GetVIncident((j + 1) % 3));
-			EdgeInfo edgeInfo(faces[i].GetVIncident((j + 2) % 3), i);
-
-			if (map.contains(edge) == true)
-			{
-				EdgeInfo edgeInfoMap = map[edge];
-				faces[edgeInfoMap.triangleID].SetFAdjacent(edgeInfoMap.adjacentVertex, i);
-			}
-			else
-				map.insert(edge, edgeInfo);
-		}
 	}
 }
 
@@ -144,24 +124,6 @@ void Triangulation::GenerateCube()
 	// Face dessous
 	faces.push_back(Face(0, 3, 7));
 	faces.push_back(Face(7, 4, 0));
-
-	QMap<Edge, EdgeInfo> map;
-	for (int i = 0; i < faces.size(); i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			Edge edge(faces[i].GetVIncident(j), faces[i].GetVIncident((j + 1) % 3));
-			EdgeInfo edgeInfo(faces[i].GetVIncident((j + 2) % 3), i);
-
-			if (map.contains(edge) == true)
-			{
-				EdgeInfo edgeInfoMap = map[edge];
-				faces[edgeInfoMap.triangleID].SetFAdjacent(edgeInfoMap.adjacentVertex, i);
-			}
-			else
-				map.insert(edge, edgeInfo);
-		}
-	}
 }
 
 void Triangulation::TriangulationNaive()
@@ -179,11 +141,10 @@ void Triangulation::TriangulationNaive()
 
 	// Vertices inside
 	vertices.push_back(Vertex(Vector3(0.0f, 0.0f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(0.25f, 0.0f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(-0.25f, 0.0f, 0.0f)));
 
 	// Vertices outside
-	vertices.push_back(Vertex(Vector3(0.5f, 0.0f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(-0.5f, 0.0f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(0.0f, -1.0f, 0.0f)));
 
 	CreateFace(0, 1, 2);
 	for (int i = 3; i < vertices.size(); i++)
@@ -191,7 +152,7 @@ void Triangulation::TriangulationNaive()
 		bool found = false;
 		for (int j = 0; j < faces.size(); j++)
 		{
-			if (IsInFace(vertices[i], faces[j]) == true)
+			if (IsInFace(faces[j], vertices[i].Point()) == true)
 			{
 				found = true;
 				SplitFace(j, i);
@@ -207,28 +168,28 @@ void Triangulation::TriangulationNaive()
 
 void Triangulation::CalculateBoundingBox()
 {
-	Vector3 min = vertices[0].p;
-	Vector3 max = vertices[0].p;
+	Vector3 min = vertices[0].Point();
+	Vector3 max = vertices[0].Point();
 
 	for (int i = 1; i < vertices.size(); ++i)
 	{
-		if (vertices[i].p.getX() < min.getX())
-			min.setX(vertices[i].p.getX());
+		if (vertices[i].Point().getX() < min.getX())
+			min.setX(vertices[i].Point().getX());
 
-		if (vertices[i].p.getY() < min.getY())
-			min.setY(vertices[i].p.getY());
+		if (vertices[i].Point().getY() < min.getY())
+			min.setY(vertices[i].Point().getY());
 
-		if (vertices[i].p.getZ() < min.getZ())
-			min.setZ(vertices[i].p.getZ());
+		if (vertices[i].Point().getZ() < min.getZ())
+			min.setZ(vertices[i].Point().getZ());
 
-		if (vertices[i].p.getX() > max.getX())
-			max.setX(vertices[i].p.getX());
+		if (vertices[i].Point().getX() > max.getX())
+			max.setX(vertices[i].Point().getX());
 
-		if (vertices[i].p.getY() > max.getY())
-			max.setY(vertices[i].p.getY());
+		if (vertices[i].Point().getY() > max.getY())
+			max.setY(vertices[i].Point().getY());
 
-		if (vertices[i].p.getZ() > max.getZ())
-			max.setZ(vertices[i].p.getZ());
+		if (vertices[i].Point().getZ() > max.getZ())
+			max.setZ(vertices[i].Point().getZ());
 	}
 	aabb.SetMinAABB(min - Vector3(0.5f));
 	aabb.SetMaxAABB(max + Vector3(0.5f));
@@ -236,8 +197,8 @@ void Triangulation::CalculateBoundingBox()
 
 int Triangulation::CreateFace(int iA, int iB, int iC)
 {
-	Vector3 a = vertices[1].p - vertices[0].p;
-	Vector3 b = vertices[2].p - vertices[1].p;
+	Vector3 a = vertices[1].Point() - vertices[0].Point();
+	Vector3 b = vertices[2].Point() - vertices[1].Point();
 	Vector3 p = Vector3::CrossProduct(a, b);
 	if (p.getY() > 0.0f)
 		faces.push_back(Face(iA, iB, iC));
@@ -248,14 +209,14 @@ int Triangulation::CreateFace(int iA, int iB, int iC)
 
 void Triangulation::AddVertexToConvexHull(int s)
 {
-	Vertex p = GetVertices()[s];
+	Vertex p = Vertices()[s];
 
 	for (int i = 0; i < hull.size(); i++)
 	{
 		int s1 = hull[i];
 		int s2 = hull[(i + 1) % hull.size()];
-		Vertex p1 = GetVertices()[s1];
-		Vertex p2 = GetVertices()[s2];
+		Vertex p1 = Vertices()[s1];
+		Vertex p2 = Vertices()[s2];
 
 		if (VertexSideLine(p1, p2, p) > 0.0f)
 		{
@@ -287,7 +248,7 @@ void Triangulation::DelaunayLawson()
 			Face f = faces[i];
 			for (int j = 0; j < 3; j++)
 			{
-				int fB = f.WorldFaceIndex(j);
+				int fB = f.FaceIndex(j);
 
 				if (fB == -1)
 					continue;
@@ -295,7 +256,7 @@ void Triangulation::DelaunayLawson()
 				Face faceB = faces[fB];
 				int localFaceB = faceB.LocalFaceIndex(i);
 
-				int p = faceB.WorldVertexIndex(localFaceB);
+				int p = faceB.VertexIndex(localFaceB);
 				if (IsInCircumcircle(i, p) > 0.0f)
 				{
 					FlipEdge(i, fB);
@@ -310,114 +271,130 @@ void Triangulation::SplitFace(int f, int s)
 {
 	Face face = faces[f];
 
-	int iC = face.iC;
-	face.iC = s;
-	vertices[face.iA].adjacentFace = f;
-	vertices[face.iB].adjacentFace = f;
-	vertices[face.iC].adjacentFace = f;
+	Face a = Face(face.VertexIndex(1), s, face.VertexIndex(0));
+	Face b = Face(face.VertexIndex(2), s, face.VertexIndex(1));
+	Face c = Face(face.VertexIndex(0), s, face.VertexIndex(2));
 
-	int f1 = CreateFace(face.iB, iC, s);
-	vertices[faces[f1].iA].adjacentFace = f1;
-	vertices[faces[f1].iB].adjacentFace = f1;
-	vertices[faces[f1].iC].adjacentFace = f1;
-	faces[f1].fA = f;
-	face.fB = f1;
+	int idA = f;
+	faces.replace(idA, a);
+	int idB = faces.size();
+	faces.push_back(b);
+	int idC = faces.size();
+	faces.push_back(c);
 
-	int f2 = CreateFace(face.iA, s, iC);
-	vertices[faces[f2].iA].adjacentFace = f2;
-	vertices[faces[f2].iB].adjacentFace = f2;
-	vertices[faces[f2].iC].adjacentFace = f2;
-	faces[f2].fA = f;
-	face.fA = f2;
+	vertices[s].AdjacentFace() = idA;
+	if (vertices[face.VertexIndex(1)].AdjacentFace() == idA)
+		vertices[face.VertexIndex(1)].AdjacentFace() = idB;
+	if (vertices[face.VertexIndex(2)].AdjacentFace() == idA)
+		vertices[face.VertexIndex(2)].AdjacentFace() = idC;
 
-	faces[f1].fC = f2;
-	faces[f2].fB = f1;
-	face.fC = f2;
+	faces[idA].FaceIndex(0) = idC;
+	faces[idA].FaceIndex(1) = face.FaceIndex(2);
+	faces[idA].FaceIndex(2) = idB;
+	if (face.FaceIndex(2) >= 0)
+		faces[face.FaceIndex(2)].FaceIndex(faces[face.FaceIndex(2)].LocalFaceIndex(f)) = idA;
+
+	faces[idB].FaceIndex(0) = idA;
+	faces[idB].FaceIndex(1) = face.FaceIndex(0);
+	faces[idB].FaceIndex(2) = idC;
+	if (face.FaceIndex(0) >= 0)
+		faces[face.FaceIndex(0)].FaceIndex(faces[face.FaceIndex(0)].LocalFaceIndex(f)) = idB;
+
+	faces[idC].FaceIndex(0) = idB;
+	faces[idC].FaceIndex(1) = face.FaceIndex(1);
+	faces[idC].FaceIndex(2) = idA;
+	if (face.FaceIndex(1) >= 0)
+		faces[face.FaceIndex(1)].FaceIndex(faces[face.FaceIndex(1)].LocalFaceIndex(f)) = idC;
 }
 
 void Triangulation::FlipEdge(int fA, int fB)
 {
+	/*
 	// Flip
 	Face faceA = faces[fA];
-    Face faceB = faces[fB];
+	Face faceB = faces[fB];
 
-    //Les indices locaux des sommets adjacents(voisins) aux faces
+	//Les indices locaux des sommets adjacents(voisins) aux faces
 	int sA = faceA.LocalFaceIndex(fB);
 	int sB = faceB.LocalFaceIndex(fA);
 
-    //Voisins de A et B à mettre à jour
-    int iFaceK = faceA.GetFAdjacent((sA + 2) % 3); //Voisin de A
-    int iFaceL = faceB.GetFAdjacent((sB + 2) % 3); //Voisin de B
-    Face faceK = faces[iFaceK];
-    Face faceL = faces[iFaceL];
+	//Voisins de A et B à mettre à jour
+	int iFaceK = faceA.FaceIndex((sA + 2) % 3); //Voisin de A
+	int iFaceL = faceB.FaceIndex((sB + 2) % 3); //Voisin de B
+	Face faceK = faces[iFaceK];
+	Face faceL = faces[iFaceL];
 
-    //Les indices locaux des sommets voisins dans les triangles
-    int sK = faceK.LocalFaceIndex(fA);
-    int sL = faceL.LocalFaceIndex(fB);
+	//Les indices locaux des sommets voisins dans les triangles
+	int sK = faceK.LocalFaceIndex(fA);
+	int sL = faceL.LocalFaceIndex(fB);
 
-    //Les indices globaux avec la fonction WorldVertexIndex
-	Face nFaceA(faceA.WorldVertexIndex(sA), faceA.WorldVertexIndex((sA + 1) % 3), faceB.WorldVertexIndex(sB));
-	Face nFaceB(faceB.WorldVertexIndex(sB), faceB.WorldVertexIndex((sB + 1) % 3), faceA.WorldVertexIndex(sA));
+	//Les indices globaux avec la fonction WorldVertexIndex
+	Face nFaceA(faceA.VertexIndex(sA), faceA.VertexIndex((sA + 1) % 3), faceB.VertexIndex(sB));
+	Face nFaceB(faceB.VertexIndex(sB), faceB.VertexIndex((sB + 1) % 3), faceA.VertexIndex(sA));
 
-    //Mise à jour voisin des deux premières faces
-    nFaceA.SetFAdjacent(0,iFaceL);
-    nFaceA.SetFAdjacent(1,faceA.GetFAdjacent(1));
-    nFaceA.SetFAdjacent(2,faceA.GetFAdjacent(2));
-    nFaceB.SetFAdjacent(0,iFaceK);
-    nFaceB.SetFAdjacent(1,faceB.GetFAdjacent(1));
-    nFaceB.SetFAdjacent(2,faceB.GetFAdjacent(2));
+	//Mise à jour voisin des deux premières faces
+	nFaceA.FaceIndex = (0, iFaceL);
+	nFaceA.FaceIndex = (1, faceA.FaceIndex(1));
+	nFaceA.FaceIndex = (2, faceA.FaceIndex(2));
+	nFaceB.FaceIndex = (0, iFaceK);
+	nFaceB.FaceIndex = (1, faceB.FaceIndex(1));
+	nFaceB.FaceIndex = (2, faceB.FaceIndex(2));
 
 	// Update Voisins faces
-    faceK.SetFAdjacent(sK,fB);
-    faceL.SetFAdjacent(sL,fA);
-    faces[fA] = nFaceA;
-    faces[fB] = nFaceB;
+	faceK.FaceIndex = (sK, fB);
+	faceL.FaceIndex = (sL, fA);
+	faces[fA] = nFaceA;
+	faces[fB] = nFaceB;
 
 	// Update Voisins faces voisines
+	*/
 }
 /* Fonctions utilitaires */
 
 /* Prédicats */
 float Triangulation::VertexSideLine(Vertex p1, Vertex p2, Vertex p)
 {
-	return (p1.p.getX() - p.p.getX()) * (p2.p.getY() - p.p.getY()) - (p1.p.getY() - p.p.getY()) * (p2.p.getX() - p.p.getX());
+	return (p1.Point().getX() - p.Point().getX()) * (p2.Point().getY() - p.Point().getY()) - (p1.Point().getY() - p.Point().getY()) * (p2.Point().getX() - p.Point().getX());
 }
 
-bool Triangulation::IsInFace(Vertex s, Face f)
+bool Triangulation::IsInFace(Face f, Vector3 p)
 {
-	Vertex p1 = vertices[f.iA];
-	Vertex p2 = vertices[f.iB];
-	Vertex p3 = vertices[f.iC];
+	Vector3 p0 = vertices[f.VertexIndex(0)].Point();
+	Vector3 p1 = vertices[f.VertexIndex(1)].Point();
+	Vector3 p2 = vertices[f.VertexIndex(2)].Point();
 
-	double area1 = (p2.p.getY() - s.p.getY()) * (p1.p.getX() - s.p.getX()) - (p2.p.getX() - s.p.getX()) * (p1.p.getY() - s.p.getY());
-	double area2 = (p3.p.getY() - s.p.getY()) * (p2.p.getX() - s.p.getX()) - (p3.p.getX() - s.p.getX()) * (p2.p.getY() - s.p.getY());
-	double area3 = (p1.p.getY() - s.p.getY()) * (p3.p.getX() - s.p.getX()) - (p1.p.getX() - s.p.getX()) * (p3.p.getY() - s.p.getY());
+	// Calculs des aires signées pour chaque arêtes du triangle et le pixel
+	double area01PX = 0.5 * ((p1.getX() - p0.getX()) * (p.getY() - p0.getY()) - (p.getX() - p0.getX()) * (p1.getY() - p0.getY()));
+	double area12PX = 0.5 * ((p2.getX() - p1.getX()) * (p.getY() - p1.getY()) - (p.getX() - p1.getX()) * (p2.getY() - p1.getY()));
+	double area20PX = 0.5 * ((p0.getX() - p2.getX()) * (p.getY() - p2.getY()) - (p.getX() - p2.getX()) * (p0.getY() - p2.getY()));
 
-	if (area1 >= 0 && area2 >= 0 && area3 >= 0)
+	// Si pixel dans le triangle (aires signées positives), couleur du triangle
+	if (area01PX >= 0.0 && area12PX >= 0.0 && area20PX >= 0.0)
 		return true;
-	return false;
+	else
+		return false;
 }
 
 bool Triangulation::IsInCircumcircle(int f, int v)
 {
 	Face face = faces[f];
-	Vertex s = vertices[v];
-	Vertex p = vertices[face.GetVIncident((0))];
-	Vertex q = vertices[face.GetVIncident((1))];
-	Vertex r = vertices[face.GetVIncident((2))];
+	Vector3 s = vertices[v].Point();
+	Vector3 p = vertices[face.VertexIndex((0))].Point();
+	Vector3 q = vertices[face.VertexIndex((1))].Point();
+	Vector3 r = vertices[face.VertexIndex((2))].Point();
 
 	float mat[3][3];
-	mat[0][0] = q.p.getX() - p.p.getX();
-	mat[0][1] = r.p.getX() - p.p.getX();
-	mat[0][2] = s.p.getX() - p.p.getX();
+	mat[0][0] = q.getX() - p.getX();
+	mat[0][1] = r.getX() - p.getX();
+	mat[0][2] = s.getX() - p.getX();
 
-	mat[1][0] = q.p.getY() - p.p.getY();
-	mat[1][1] = r.p.getY() - p.p.getY();
-	mat[1][2] = s.p.getY() - p.p.getY();
+	mat[1][0] = q.getY() - p.getY();
+	mat[1][1] = r.getY() - p.getY();
+	mat[1][2] = s.getY() - p.getY();
 
-	mat[2][0] = pow(q.p.getY() - p.p.getY(), 2) + pow(q.p.getY() - p.p.getY(), 2);
-	mat[2][1] = pow(r.p.getY() - p.p.getY(), 2) + pow(r.p.getY() - p.p.getY(), 2);
-	mat[2][2] = pow(s.p.getY() - p.p.getY(), 2) + pow(q.p.getY() - p.p.getY(), 2);
+	mat[2][0] = pow(q.getY() - p.getY(), 2) + pow(q.getY() - p.getY(), 2);
+	mat[2][1] = pow(r.getY() - p.getY(), 2) + pow(r.getY() - p.getY(), 2);
+	mat[2][2] = pow(s.getY() - p.getY(), 2) + pow(q.getY() - p.getY(), 2);
 
 	float det = mat[0][0] * ((mat[1][1] * mat[2][2]) - (mat[2][1] * mat[1][2])) -
 		mat[0][1] * (mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) +
@@ -427,46 +404,12 @@ bool Triangulation::IsInCircumcircle(int f, int v)
 		return true;
 	return false;
 }
-
-int Triangulation::FindFace(int s)
-{
-	Vertex p = vertices[s];
-	for (int i = 0; i < faces.size(); i++)
-	{
-		Vertex a = vertices[faces[i].iA];
-		Vertex b = vertices[faces[i].iB];
-		Vertex c = vertices[faces[i].iC];
-
-		if (a.GetPoint() == p.GetPoint() ||
-			b.GetPoint() == p.GetPoint() ||
-			c.GetPoint() == p.GetPoint())
-			return i;
-	}
-	return -1;
-}
 /* Prédicats */
 
-
-/* Surcharges d'opérateurs */
-bool Edge::operator< (const Edge& e) const
-{
-	return (this->vertexA < e.vertexA && this->vertexB == e.vertexB) ||
-		(this->vertexB == e.vertexA && this->vertexA == e.vertexB);
-}
-
-bool Edge::operator== (const Edge& e)
-{
-	if ((this->vertexA == e.vertexA && this->vertexB == e.vertexB) ||
-		(this->vertexB == e.vertexA && this->vertexA == e.vertexB))
-		return true;
-	return false;
-}
-/* Surcharges d'opérateurs */
-
 /* Itérateurs */
-Iterateur_de_faces Triangulation::BeginFace()
+FacesIterator Triangulation::BeginFace()
 {
-	Iterateur_de_faces it;
+	FacesIterator it;
 	it.triangulation = this;
 	if (faces.size() > 0)
 	{
@@ -476,9 +419,9 @@ Iterateur_de_faces Triangulation::BeginFace()
 	return it;
 }
 
-Iterateur_de_faces Triangulation::EndFace()
+FacesIterator Triangulation::EndFace()
 {
-	Iterateur_de_faces it;
+	FacesIterator it;
 	it.triangulation = this;
 	if (faces.size() > 0)
 	{
@@ -507,12 +450,12 @@ void Triangulation::IncidentFaces(Vertex& v)
 
 }
 
-void Iterateur_de_faces::operator++()
+void FacesIterator::operator++()
 {
-	if (index + 1 < triangulation->GetVertices().size())
+	if (index + 1 < triangulation->Vertices().size())
 	{
 		index++;
-		face = &triangulation->GetFaces()[index];
+		face = &triangulation->Faces()[index];
 	}
 	else
 	{
@@ -521,51 +464,23 @@ void Iterateur_de_faces::operator++()
 	}
 }
 
-Face Iterateur_de_faces::operator*()
+Face FacesIterator::operator*()
 {
 	return *face;
 }
 
-void Iterateur_de_sommets::operator++()
+void VerticesIterator::operator++()
 {
 }
 
-Vertex Iterateur_de_sommets::operator*()
+Vertex VerticesIterator::operator*()
 {
 	return *sommet;
 }
 /* Itérateurs */
 
 /* Setteurs & Getteurs */
-int Face::GetVIncident(int index)
-{
-	if (index == 0)
-		return iA;
-	else if (index == 1)
-		return iB;
-	return iC;
-}
-
-int Face::GetFAdjacent(int index)
-{
-	if (index == 0)
-		return fA;
-	else if (index == 1)
-		return fB;
-	return fC;
-}
-
-void Face::SetFAdjacent(int index, int vertexID)
-{
-	if (index == 0)
-		fA = vertexID;
-	else if (index == 1)
-		fB = vertexID;
-	else
-		fC = vertexID;
-}
-
-int Face::WorldVertexIndex(int s)
+int Face::VertexIndex(int s) const
 {
 	if (s == 0)
 		return iA;
@@ -577,7 +492,7 @@ int Face::WorldVertexIndex(int s)
 		return -1;
 }
 
-int Face::WorldFaceIndex(int f)
+int Face::FaceIndex(int f) const
 {
 	if (f == 0)
 		return fA;
@@ -587,6 +502,26 @@ int Face::WorldFaceIndex(int f)
 		return fC;
 	else
 		return -1;
+}
+
+int& Face::VertexIndex(int s)
+{
+	if (s == 0)
+		return iA;
+	else if (s == 1)
+		return iB;
+	else if (s == 2)
+		return iC;
+}
+
+int& Face::FaceIndex(int f)
+{
+	if (f == 0)
+		return fA;
+	else if (f == 1)
+		return fB;
+	else if (f == 2)
+		return fC;
 }
 
 int Face::LocalVertexIndex(int s)

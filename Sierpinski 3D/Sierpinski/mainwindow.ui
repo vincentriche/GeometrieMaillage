@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
-    <height>473</height>
+    <width>894</width>
+    <height>752</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,33 +17,58 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="1">
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="GLDisplay" name="glDisplay" native="true">
+      <item row="1" column="0">
+       <widget class="GLDisplay" name="openGLWidget">
         <property name="minimumSize">
          <size>
           <width>400</width>
-          <height>400</height>
+          <height>650</height>
          </size>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="button1">
-        <property name="text">
-         <string>Faces</string>
-        </property>
-       </widget>
+    <item row="1" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QPushButton" name="button1">
+          <property name="text">
+           <string>Wireframe</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button2">
+          <property name="text">
+           <string>Faces</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="button2">
-        <property name="text">
-         <string>Wireframe</string>
-        </property>
-       </widget>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="button3">
+          <property name="text">
+           <string>Delaunay - Lawson</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button4">
+          <property name="text">
+           <string>Voronoi</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -54,7 +79,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>503</width>
+     <width>894</width>
      <height>21</height>
     </rect>
    </property>
@@ -78,9 +103,8 @@
  <customwidgets>
   <customwidget>
    <class>GLDisplay</class>
-   <extends>QWidget</extends>
-   <header location="global">gldisplay.h</header>
-   <container>1</container>
+   <extends>QOpenGLWidget</extends>
+   <header>gldisplay.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

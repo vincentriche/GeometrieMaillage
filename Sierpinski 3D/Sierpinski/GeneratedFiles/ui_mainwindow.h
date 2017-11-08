@@ -14,14 +14,16 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include <gldisplay.h>
+#include "gldisplay.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -32,10 +34,14 @@ public:
     QWidget *centralWidget;
     QGridLayout *gridLayout_2;
     QGridLayout *gridLayout_3;
-    GLDisplay *glDisplay;
-    QGridLayout *gridLayout_4;
+    GLDisplay *openGLWidget;
+    QHBoxLayout *horizontalLayout;
+    QVBoxLayout *verticalLayout_2;
     QPushButton *button1;
     QPushButton *button2;
+    QVBoxLayout *verticalLayout;
+    QPushButton *button3;
+    QPushButton *button4;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -44,7 +50,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(503, 473);
+        MainWindow->resize(894, 752);
         actionSubmenu = new QAction(MainWindow);
         actionSubmenu->setObjectName(QStringLiteral("actionSubmenu"));
         centralWidget = new QWidget(MainWindow);
@@ -56,35 +62,57 @@ public:
         gridLayout_3 = new QGridLayout();
         gridLayout_3->setSpacing(6);
         gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
-        glDisplay = new GLDisplay(centralWidget);
-        glDisplay->setObjectName(QStringLiteral("glDisplay"));
-        glDisplay->setMinimumSize(QSize(400, 400));
+        openGLWidget = new GLDisplay(centralWidget);
+        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
+        openGLWidget->setMinimumSize(QSize(400, 650));
 
-        gridLayout_3->addWidget(glDisplay, 0, 0, 1, 1);
+        gridLayout_3->addWidget(openGLWidget, 1, 0, 1, 1);
 
 
         gridLayout_2->addLayout(gridLayout_3, 0, 1, 1, 1);
 
-        gridLayout_4 = new QGridLayout();
-        gridLayout_4->setSpacing(6);
-        gridLayout_4->setObjectName(QStringLiteral("gridLayout_4"));
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(10);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         button1 = new QPushButton(centralWidget);
         button1->setObjectName(QStringLiteral("button1"));
 
-        gridLayout_4->addWidget(button1, 0, 0, 1, 1);
+        verticalLayout_2->addWidget(button1);
 
         button2 = new QPushButton(centralWidget);
         button2->setObjectName(QStringLiteral("button2"));
 
-        gridLayout_4->addWidget(button2, 1, 0, 1, 1);
+        verticalLayout_2->addWidget(button2);
 
 
-        gridLayout_2->addLayout(gridLayout_4, 0, 0, 1, 1);
+        horizontalLayout->addLayout(verticalLayout_2);
+
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        button3 = new QPushButton(centralWidget);
+        button3->setObjectName(QStringLiteral("button3"));
+
+        verticalLayout->addWidget(button3);
+
+        button4 = new QPushButton(centralWidget);
+        button4->setObjectName(QStringLiteral("button4"));
+
+        verticalLayout->addWidget(button4);
+
+
+        horizontalLayout->addLayout(verticalLayout);
+
+
+        gridLayout_2->addLayout(horizontalLayout, 1, 1, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 503, 21));
+        menuBar->setGeometry(QRect(0, 0, 894, 21));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -102,8 +130,10 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", Q_NULLPTR));
         actionSubmenu->setText(QApplication::translate("MainWindow", "submenu", Q_NULLPTR));
-        button1->setText(QApplication::translate("MainWindow", "Faces", Q_NULLPTR));
-        button2->setText(QApplication::translate("MainWindow", "Wireframe", Q_NULLPTR));
+        button1->setText(QApplication::translate("MainWindow", "Wireframe", Q_NULLPTR));
+        button2->setText(QApplication::translate("MainWindow", "Faces", Q_NULLPTR));
+        button3->setText(QApplication::translate("MainWindow", "Delaunay - Lawson", Q_NULLPTR));
+        button4->setText(QApplication::translate("MainWindow", "Voronoi", Q_NULLPTR));
     } // retranslateUi
 
 };

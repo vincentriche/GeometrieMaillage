@@ -6,8 +6,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	connect(ui->button1, SIGNAL(released()), this, SLOT(DrawFaces()));
-	connect(ui->button2, SIGNAL(released()), this, SLOT(DrawWireframe()));
+	connect(ui->button1, SIGNAL(released()), this, SLOT(DrawWireframe()));
+	connect(ui->button2, SIGNAL(released()), this, SLOT(DrawFaces()));
+	connect(ui->button3, SIGNAL(released()), this, SLOT(DelaunayLawson()));
+	connect(ui->button4, SIGNAL(released()), this, SLOT(Voronoi()));
 }
 
 MainWindow::~MainWindow()
@@ -17,10 +19,24 @@ MainWindow::~MainWindow()
 
 void MainWindow::DrawWireframe()
 {
-	ui->glDisplay->DrawWireframe();
+	ui->openGLWidget->GetTriangulation().SetGLRenderMode(GL_LINES);
+	ui->openGLWidget->update();
 }
 
 void MainWindow::DrawFaces()
 {
-	ui->glDisplay->DrawFaces();
+	ui->openGLWidget->GetTriangulation().SetGLRenderMode(GL_TRIANGLES);
+	ui->openGLWidget->update();
+}
+
+void MainWindow::DelaunayLawson()
+{
+	ui->openGLWidget->GetTriangulation().DelaunayLawson();
+	ui->openGLWidget->update();
+}
+
+void MainWindow::Voronoi()
+{
+	//ui->openGLWidget->GetTriangulation().Voronoi();
+	//ui->openGLWidget->update();
 }

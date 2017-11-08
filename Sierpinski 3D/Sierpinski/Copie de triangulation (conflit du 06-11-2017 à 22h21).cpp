@@ -129,10 +129,9 @@ void Triangulation::TriangulationNaive()
 	vertices.clear();
 	faces.clear();
 
-	vertices.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(8.242f, -7.353f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(-5.324f, -9.355f, 0.0f)));
-
+	vertices.push_back(Vertex(Vector3(3.250f, 9.0f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(-4.25f, 5.75f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(-3.85f, -8.75, 0.0f)));
 
 	hull.push_back(0);
 	hull.push_back(1);
@@ -140,13 +139,12 @@ void Triangulation::TriangulationNaive()
 
 	CreateFace(0, 1, 2);
 
-	AddVertex(Vertex(Vector3(6.0f, 0.0f, 0.0f)));
-	AddVertex(Vertex(Vector3(6.0f, -6.0f, 0.0f)));
-	AddVertex(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));
+	InsertVertex(Vector3(1.85f, -9.75, 0.0f));
+	InsertVertex(Vector3(-2.45f, -5.0f, 0.0f));
 
 }
 
-void Triangulation::AddVertex(Vertex v)
+void Triangulation::InsertVertex(Vertex v)
 {
 	int i = vertices.size();
 	vertices.push_back(v);
@@ -220,7 +218,7 @@ void Triangulation::AddVertexToConvexHull(int s)
 
 		if (VertexSideLine(p1.Point(), p2.Point(), p.Point()) > 0.0f)
 		{
-			//CreateFace(s1, s, s2);
+			CreateFace(s1, s, s2);
 
 			/*
 			Circulateur_de_faces circulateur(this, hull[s1]);
@@ -229,7 +227,7 @@ void Triangulation::AddVertexToConvexHull(int s)
 			int c = -1;
 			while (vertexA == -1 || vertexB == -1)
 			{
-			c = *circulateur;
+				c = *circulateur;
 			}
 			*/
 		}
@@ -239,21 +237,24 @@ void Triangulation::AddVertexToConvexHull(int s)
 void Triangulation::DelaunayLawson()
 {
 	bool isDelaunay = false;
+
 	while (isDelaunay == false)
 	{
 		isDelaunay = true;
 		for (int i = 0; i < faces.size(); i++)
 		{
-			Face face = faces[i];
+			Face f = faces[i];
 			for (int j = 0; j < 3; j++)
 			{
-				int fB = face.FaceIndex(j);
+				int fB = f.FaceIndex(j);
+
 				if (fB == -1 || isTrianglesConvex(i, fB) == false)
 					continue;
 
 				Face faceB = faces[fB];
-				Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(i))].Point();
-				if (IsInCircumcircle(i, v) == true)
+				int localFaceB = faceB.LocalFaceIndex(i);
+				int p = faceB.VertexIndex(localFaceB);
+				if (IsInCircumcircle(i, p) == true)
 				{
 					FlipEdge(i, fB);
 					isDelaunay = false;
@@ -263,23 +264,18 @@ void Triangulation::DelaunayLawson()
 	}
 }
 
-void Triangulation::DelaunayIncremental()
-{
-
-}
-
 void Triangulation::SplitFace(int f, int s)
 {
 	Face face = faces[f];
+
 	Face faceA = Face(face.VertexIndex(1), s, face.VertexIndex(0));
+	Face faceB = Face(face.VertexIndex(2), s, face.VertexIndex(1));
+	Face faceC = Face(face.VertexIndex(0), s, face.VertexIndex(2));
+
 	int iA = f;
 	faces[iA] = faceA;
-
-	Face faceB = Face(face.VertexIndex(2), s, face.VertexIndex(1));
 	int iB = faces.size();
 	faces.push_back(faceB);
-
-	Face faceC = Face(face.VertexIndex(0), s, face.VertexIndex(2));
 	int iC = faces.size();
 	faces.push_back(faceC);
 
@@ -289,37 +285,23 @@ void Triangulation::SplitFace(int f, int s)
 	if (vertices[face.VertexIndex(2)].AdjacentFace() == iA)
 		vertices[face.VertexIndex(2)].AdjacentFace() = iC;
 
-	faces[iA].FaceIndex(0, iC);
-	faces[iA].FaceIndex(1, face.FaceIndex(2));
-	faces[iA].FaceIndex(2, iB);
-
-	faces[iB].FaceIndex(0, iA);
-	faces[iB].FaceIndex(1, face.FaceIndex(0));
-	faces[iB].FaceIndex(2, iC);
-
-	faces[iC].FaceIndex(0, iB);
-	faces[iC].FaceIndex(1, face.FaceIndex(1));
-	faces[iC].FaceIndex(2, iA);
-
-	if (face.FaceIndex(0) >= 0)
-	{
-		int idFace0 = face.FaceIndex(0);
-		faces[idFace0].FaceIndex(faces[idFace0].LocalFaceIndex(f), iB);
-	}
-
-	if (face.FaceIndex(1) >= 0)
-	{
-		int idFace1 = face.FaceIndex(1);
-		faces[idFace1].FaceIndex(faces[idFace1].LocalFaceIndex(f), iC);
-	}
-
+	faces[iA].FaceIndex(0) = iC;
+	faces[iA].FaceIndex(1) = face.FaceIndex(2);
+	faces[iA].FaceIndex(2) = iB;
 	if (face.FaceIndex(2) >= 0)
-	{
-		int idFace2 = face.FaceIndex(2);
-		faces[idFace2].FaceIndex(faces[idFace2].LocalFaceIndex(f), iA);
-	}
+		faces[face.FaceIndex(2)].FaceIndex(faces[face.FaceIndex(2)].LocalFaceIndex(f)) = iA;
 
+	faces[iB].FaceIndex(0) = iA;
+	faces[iB].FaceIndex(1) = face.FaceIndex(0);
+	faces[iB].FaceIndex(2) = iC;
+	if (face.FaceIndex(0) >= 0)
+		faces[face.FaceIndex(0)].FaceIndex(faces[face.FaceIndex(0)].LocalFaceIndex(f)) = iB;
 
+	faces[iC].FaceIndex(0) = iB;
+	faces[iC].FaceIndex(1) = face.FaceIndex(1);
+	faces[iC].FaceIndex(2) = iA;
+	if (face.FaceIndex(1) >= 0)
+		faces[face.FaceIndex(1)].FaceIndex(faces[face.FaceIndex(1)].LocalFaceIndex(f)) = iC;
 }
 
 void Triangulation::FlipEdge(int fA, int fB)
@@ -361,55 +343,45 @@ void Triangulation::FlipEdge(int fA, int fB)
 	faces[fA] = nFaceA;
 	faces[fB] = nFaceB;
 	*/
-
+	
 	Face faceA = faces[fA];
 	Face faceB = faces[fB];
 
 	int localFaceA = faceA.LocalFaceIndex(fB);
 	int localFaceB = faceB.LocalFaceIndex(fA);
 
-	int idVertex0 = faceA.VertexIndex(localFaceA);
-	int idVertex1 = faceB.VertexIndex(localFaceB);
-	int idVertex2 = faceA.VertexIndex((localFaceA + 1) % 3);
-	int idVertex3 = faceB.VertexIndex((localFaceB + 1) % 3);
+	Face newFaceA(faceA.VertexIndex(localFaceA), faceA.VertexIndex((localFaceA + 1) % 3), faceB.VertexIndex(localFaceB));
+	Face newFaceB(faceB.VertexIndex(localFaceB), faceB.VertexIndex((localFaceB + 1) % 3), faceA.VertexIndex(localFaceA));
 
-	Face newFaceA(idVertex0, idVertex2, idVertex1);
-	Face newFaceB(idVertex1, idVertex3, idVertex0);
+	if (vertices[faceA.VertexIndex((localFaceA + 1) % 3)].AdjacentFace() == fB)
+		vertices[faceA.VertexIndex((localFaceA + 1) % 3)].AdjacentFace() = fA;
+	if (vertices[faceB.VertexIndex((localFaceB + 1) % 3)].AdjacentFace() == fA)
+		vertices[faceB.VertexIndex((localFaceB + 1) % 3)].AdjacentFace() = fB;
 
-	if (vertices[idVertex2].AdjacentFace() == fB)
-		vertices[idVertex2].AdjacentFace() = fA;
-	if (vertices[idVertex3].AdjacentFace() == fA)
-		vertices[idVertex3].AdjacentFace() = fB;
+	newFaceA.FaceIndex(0) = faceB.FaceIndex((localFaceB + 1) % 3);
+	newFaceA.FaceIndex(1) = fB;
+	newFaceA.FaceIndex(2) = faceA.FaceIndex((localFaceA + 2) % 3);
 
-	int idFace0 = faceA.FaceIndex((localFaceA + 2) % 3);
-	int idFace1 = faceB.FaceIndex((localFaceB + 1) % 3);
-	int idFace2 = faceA.FaceIndex((localFaceA + 1) % 3);
-	int idFace3 = faceB.FaceIndex((localFaceB + 2) % 3);
+	newFaceB.FaceIndex(0) = faceA.FaceIndex((localFaceA + 1) % 3);
+	newFaceB.FaceIndex(1) = fA;
+	newFaceB.FaceIndex(2) = faceB.FaceIndex((localFaceB + 2) % 3);
 
-	newFaceA.FaceIndex(0, idFace1);
-	newFaceA.FaceIndex(1, fB);
-	newFaceA.FaceIndex(2, idFace0);
+	int faceIdA = faceA.FaceIndex((localFaceA + 1) % 3);
+	if (faceIdA >= 0)
+	{
+		int localN = faces[faceIdA].LocalFaceIndex(fA);
+		faces[faceIdA].FaceIndex(localN) = fB;
+	}
 
-	newFaceB.FaceIndex(0, idFace2);
-	newFaceB.FaceIndex(1, fA);
-	newFaceB.FaceIndex(2, idFace3);
+	int faceIdB = faceB.FaceIndex((localFaceB + 1) % 3);
+	if (faceIdB >= 0)
+	{
+		int localN = faces[faceIdB].LocalFaceIndex(fB);
+		faces[faceIdB].FaceIndex(localN) = fA;
+	}
 
 	faces[fA] = newFaceA;
 	faces[fB] = newFaceB;
-
-	int faceIdA = idFace2;
-	if (faceIdA >= 0)
-	{
-		int localIndexA = faces[faceIdA].LocalFaceIndex(fA);
-		faces[faceIdA].FaceIndex(localIndexA, fB);
-	}
-
-	int faceIdB = idFace1;
-	if (faceIdB >= 0)
-	{
-		int localIndexB = faces[faceIdB].LocalFaceIndex(fB);
-		faces[faceIdB].FaceIndex(localIndexB, fA);
-	}
 }
 /* Fonctions utilitaires */
 
@@ -437,9 +409,10 @@ bool Triangulation::IsInFace(Face f, Vector3 p)
 		return false;
 }
 
-bool Triangulation::IsInCircumcircle(int f, Vector3 s)
+bool Triangulation::IsInCircumcircle(int f, int v)
 {
 	Face face = faces[f];
+	Vector3 s = vertices[v].Point();
 	Vector3 p = vertices[face.VertexIndex((0))].Point();
 	Vector3 q = vertices[face.VertexIndex((1))].Point();
 	Vector3 r = vertices[face.VertexIndex((2))].Point();
@@ -457,13 +430,13 @@ bool Triangulation::IsInCircumcircle(int f, Vector3 s)
 	m[1][2] = s.getY() - p.getY();
 	m[2][2] = pow(m[0][2], 2) + pow(m[1][2], 2);
 
-	float d = m[0][0] * ((m[1][1] * m[2][2]) - (m[2][1] * m[1][2])) - 
-			   m[0][1] * (m[1][0] * m[2][2] - m[2][0] * m[1][2]) + 
-			   m[0][2] * (m[1][0] * m[2][1] - m[2][0] * m[1][1]);
+	float d = m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
+		m[0][1] * (m[1][0] * m[2][2] - m[2][0] * m[1][2]) +
+		m[0][2] * (m[1][0] * m[2][1] - m[2][0] * m[1][1]);
 
-	if (-d >= 0.0f)
-		return true;
-	return false;
+	if (d < 0.0f)
+		return false;
+	return true;
 }
 
 bool Triangulation::isTrianglesConvex(int fA, int fB)
@@ -474,39 +447,31 @@ bool Triangulation::isTrianglesConvex(int fA, int fB)
 	int localFaceA = faceA.LocalFaceIndex(fB);
 	int localFaceB = faceB.LocalFaceIndex(fA);
 
-	if (localFaceA == -1 || localFaceB == -1)
-		return false;
-
-	int idVertex0 = faceA.VertexIndex(localFaceA);
-	int idVertex1 = faceB.VertexIndex(localFaceB);
-	int idVertex2 = faceA.VertexIndex((localFaceA + 1) % 3);
-	int idVertex3 = faceB.VertexIndex((localFaceB + 1) % 3);
-
-	Vertex sA = vertices[idVertex0];
-	Vertex s = vertices[idVertex2];
-	Vertex sB = vertices[idVertex1];
+	Vertex sA = vertices[faceA.VertexIndex(localFaceA)];
+	Vertex s = vertices[faceA.VertexIndex((localFaceA + 1) % 3)];
+	Vertex sB = vertices[faceB.VertexIndex(localFaceB)];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
-		return false;
+		return true;
 
-	sA = vertices[idVertex2];
-	s = vertices[idVertex1];
-	sB = vertices[idVertex3];
+	sA = vertices[faceA.VertexIndex((localFaceA + 1) % 3)];
+	s = vertices[faceB.VertexIndex(localFaceB)];
+	sB = vertices[faceB.VertexIndex((localFaceB + 1) % 3)];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
-		return false;
+		return true;
 
-	sA = vertices[idVertex1];
-	s = vertices[idVertex3];
-	sB = vertices[idVertex0];
+	sA = vertices[faceB.VertexIndex(localFaceB)];
+	s = vertices[faceB.VertexIndex((localFaceB + 1) % 3)];
+	sB = vertices[faceA.VertexIndex(localFaceA)];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
-		return false;
+		return true;
 
-	sA = vertices[idVertex3];
-	s = vertices[idVertex0];
-	sB = vertices[idVertex2];
+	sA = vertices[faceB.VertexIndex((localFaceB + 1) % 3)];
+	s = vertices[faceA.VertexIndex(localFaceA)];
+	sB = vertices[faceA.VertexIndex((localFaceA + 1) % 3)];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
-		return false;
+		return true;
 
-	return true;
+	return false;
 }
 /* Prédicats */
 
@@ -608,24 +573,24 @@ int Face::FaceIndex(int f) const
 		return -1;
 }
 
-void Face::VertexIndex(int s, int i)
+int& Face::VertexIndex(int s)
 {
 	if (s == 0)
-		iA = i;
+		return iA;
 	else if (s == 1)
-		iB = i;
-	else
-		i = iC;
+		return iB;
+	else if (s == 2)
+		return iC;
 }
 
-void Face::FaceIndex(int f, int i)
+int& Face::FaceIndex(int f)
 {
 	if (f == 0)
-		fA = i;
+		return fA;
 	else if (f == 1)
-		fB = i;
-	else
-		fC = i;
+		return fB;
+	else if (f == 2)
+		return fC;
 }
 
 int Face::LocalVertexIndex(int s)

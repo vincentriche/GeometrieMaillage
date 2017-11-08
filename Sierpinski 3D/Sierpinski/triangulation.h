@@ -67,8 +67,8 @@ public:
 
 	int VertexIndex(int s) const;
 	int FaceIndex(int f) const;
-	int& VertexIndex(int s);
-	int& FaceIndex(int f);
+	void VertexIndex(int s, int i);
+	void FaceIndex(int f, int i);
 	int LocalVertexIndex(int s);
 	int LocalFaceIndex(int f);
 };
@@ -87,19 +87,22 @@ public:
 	void draw();
 	void ReadFile();
 	void GenerateCube();
-	void TriangulationNaive();
+	void TriangulationNaive(); 
+	void AddVertex(Vertex v);
 	void CalculateBoundingBox();
 	int CreateFace(int iA, int iB, int iC);
 	void AddVertexToConvexHull(int s);
 	void DelaunayLawson();
+	void DelaunayIncremental();
 	void SplitFace(int f, int s);
 	void FlipEdge(int f, int s);
 	/* Fonctions utilitaires */
 
 	/* Prédicats */
+	double VertexSideLine(Vector3 p1, Vector3 p2, Vector3 p);
 	bool IsInFace(Face f, Vector3 p);
-	bool IsInCircumcircle(int f, int s);
-	float VertexSideLine(Vertex p1, Vertex p2, Vertex p); 
+	bool IsInCircumcircle(int f, Vector3 s);
+	bool isTrianglesConvex(int fA, int fB);
 
 
 	/* Surcharges d'opérateurs */

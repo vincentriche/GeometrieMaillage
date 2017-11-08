@@ -19,6 +19,8 @@ public:
 public slots:
 	void DrawWireframe();
 	void DrawFaces();
+	void DelaunayLawson();
+	void Voronoi();
 
 private:
 	Ui::MainWindow *ui;

@@ -1,13 +1,13 @@
 #ifndef GLDISPLAY_H
 #define GLDISPLAY_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QMouseEvent>
 
 #include <gasket.h>
 #include <triangulation.h>
 
-class GLDisplay : public QGLWidget
+class GLDisplay : public QOpenGLWidget
 {
 	Q_OBJECT
 public:
@@ -19,15 +19,14 @@ public:
 
 	virtual void resizeGL(int w, int h);
 
-	void DrawWireframe();
-	void DrawFaces();
+
+	virtual Triangulation& GetTriangulation();
 
 protected:
 	virtual void mouseMoveEvent ( QMouseEvent * event );
 	virtual void mousePressEvent ( QMouseEvent * event );
 
 private:
-	void drawSierpinski();
 	Triangulation mesh;
 
 	float _angle;

@@ -207,6 +207,16 @@ int Triangulation::CreateFace(int iA, int iB, int iC)
 	return faces.size() - 1;
 }
 
+int Triangulation::FindFace(Vertex v)
+{
+	for (int i = 0; i < faces.size(); i++)
+	{
+		if (IsInFace(faces[i], v.Point()) == true)
+			return i;
+	}
+	return -1;
+}
+
 void Triangulation::AddVertexToConvexHull(int s)
 {
 	Vertex p = Vertices()[s];
@@ -263,9 +273,37 @@ void Triangulation::DelaunayLawson()
 	}
 }
 
-void Triangulation::DelaunayIncremental()
+void Triangulation::DelaunayIncremental(Vertex s)
 {
+	bool isDelaunay = false;
+	QVector<Face> facesToCheck;
+	Face face = faces[FindFace(s)];
+	facesToCheck.push_back(face);
 
+	while (facesToCheck.empty() == false)
+	{
+		isDelaunay = true;
+		face = facesToCheck[0];
+		facesToCheck.pop_front();
+		
+		for (int j = 0; j < 3; j++)
+		{
+			int fA = std::find(faces.begin(), faces.end(), face) - faces.begin();
+			int fB = face.FaceIndex(j);
+
+			if (fB == -1 || fA >= faces.size() || isTrianglesConvex(fA, fB) == false)
+				continue;
+
+			Face faceB = faces[fB];
+			Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(fA))].Point();
+			if (IsInCircumcircle(fA, v) == true)
+			{
+				FlipEdge(fA, fB);
+				isDelaunay = false;
+				facesToCheck.push_back(faceB);
+			}	
+		}
+	}
 }
 
 void Triangulation::SplitFace(int f, int s)
@@ -457,9 +495,9 @@ bool Triangulation::IsInCircumcircle(int f, Vector3 s)
 	m[1][2] = s.getY() - p.getY();
 	m[2][2] = pow(m[0][2], 2) + pow(m[1][2], 2);
 
-	float d = m[0][0] * ((m[1][1] * m[2][2]) - (m[2][1] * m[1][2])) - 
-			   m[0][1] * (m[1][0] * m[2][2] - m[2][0] * m[1][2]) + 
-			   m[0][2] * (m[1][0] * m[2][1] - m[2][0] * m[1][1]);
+	float d = m[0][0] * ((m[1][1] * m[2][2]) - (m[2][1] * m[1][2])) -
+		m[0][1] * (m[1][0] * m[2][2] - m[2][0] * m[1][2]) +
+		m[0][2] * (m[1][0] * m[2][1] - m[2][0] * m[1][1]);
 
 	if (-d >= 0.0f)
 		return true;

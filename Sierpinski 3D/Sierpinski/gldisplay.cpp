@@ -82,8 +82,9 @@ void GLDisplay::mousePressEvent(QMouseEvent *event)
 		pX = pX / width() * sizeX + minX;
 		pY = pY / height() * sizeY + minY;
 
-		mesh.AddVertex(Vertex(Vector3(pX, pY, 0.0f)));
-		mesh.DelaunayLawson();
+		Vertex v = Vertex(Vector3(pX, pY, 0.0f));
+		mesh.AddVertex(v);
+		mesh.DelaunayIncremental(v);
 		update();
 	}
 }

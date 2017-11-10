@@ -71,6 +71,11 @@ public:
 	void FaceIndex(int f, int i);
 	int LocalVertexIndex(int s);
 	int LocalFaceIndex(int f);
+
+	bool Face::operator ==(const Face &b) const
+	{
+		return (iA == b.iA && iB == b.iB && iC == b.iC && fA == b.fA && fB == b.fB && fC == b.fC);
+	}
 };
 
 class Triangulation
@@ -87,13 +92,14 @@ public:
 	void draw();
 	void ReadFile();
 	void GenerateCube();
-	void TriangulationNaive(); 
+	void TriangulationNaive();
 	void AddVertex(Vertex v);
 	void CalculateBoundingBox();
 	int CreateFace(int iA, int iB, int iC);
+	int FindFace(Vertex v);
 	void AddVertexToConvexHull(int s);
 	void DelaunayLawson();
-	void DelaunayIncremental();
+	void DelaunayIncremental(Vertex s);
 	void SplitFace(int f, int s);
 	void FlipEdge(int f, int s);
 	/* Fonctions utilitaires */

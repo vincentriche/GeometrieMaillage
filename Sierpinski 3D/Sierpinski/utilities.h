@@ -1,6 +1,9 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include "qvector.h"
+#include "Windows.h"
+
 class Vector3
 {
 private:
@@ -28,22 +31,15 @@ public:
 	void setZ(double z) { this->z = z; }
 };
 
-static const Vector3 colors[] =
+class Color
 {
-	Vector3(1.0, 0.0, 0.0),
-	Vector3(0.0, 1.0, 0.0),
-	Vector3(0.0, 0.0, 1.0),
-	Vector3(1.0, 1.0, 0.0),
-	Vector3(0.0, 1.0, 1.0),
-	Vector3(1.0, 0.0, 1.0),
-	Vector3(1.0, 1.0, 1.0),
-	Vector3(0.5, 0.0, 0.0),
-	Vector3(0.0, 0.5, 0.0),
-	Vector3(0.0, 0.0, 0.5),
-	Vector3(0.5, 0.5, 0.0),
-	Vector3(0.0, 0.5, 0.5),
-	Vector3(0.5, 0.0, 0.5),
-	Vector3(0.5, 0.5, 0.5),
+private:
+	QVector<Vector3> colors;
+
+public:
+	void InitColors();
+	Vector3 ConvertHexColor(const char* hex);
+	Vector3 GetColor(int i) { return colors[i % colors.size()]; }
 };
 
 #endif // UTILITIES_H

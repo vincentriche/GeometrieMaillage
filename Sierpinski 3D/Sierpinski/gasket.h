@@ -2,7 +2,7 @@
 #define GASKET_H
 
 struct point {
-	double x, y, z;
+	float x, y, z;
 };
 
 class Gasket

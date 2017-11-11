@@ -87,6 +87,7 @@ private:
 	QVector<Vertex> voronoisCenters;
 	AABB aabb;
 	GLenum renderMode;
+	Color color;
 
 	bool isDelaunay = false;
 	bool isVoronoi = false;

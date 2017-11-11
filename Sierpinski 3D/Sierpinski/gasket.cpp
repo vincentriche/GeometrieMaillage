@@ -26,9 +26,9 @@ Gasket::Gasket()
 	for( int i = 0; i < POINTS; i++ ) {
 		int index = rand() % CONTROL_VERTICES;
 
-		point newPoint = { (vertices[index].x + p.x) / 2.0,
-						   (vertices[index].y + p.y) / 2.0,
-						   (vertices[index].z + p.z) / 2.0};
+		point newPoint = { (vertices[index].x + p.x) / 2.0f,
+						   (vertices[index].y + p.y) / 2.0f,
+						   (vertices[index].z + p.z) / 2.0f};
 
 		p = newPoint;
 		points[i] = newPoint;

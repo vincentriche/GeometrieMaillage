@@ -9,7 +9,8 @@ using namespace std;
 
 Triangulation::Triangulation()
 {
-	srand(time(NULL));
+	srand(time(NULL)); 
+	color.InitColors();
 	renderMode = GL_LINES;
 
 	TriangulationNaive();
@@ -25,8 +26,8 @@ void Triangulation::draw()
 	{
 		for (int i = 0; i < faces.size(); i++)
 		{
-			Vector3 color = colors[i % 14];
-			glColor4f(color.getX(), color.getY(), color.getZ(), 1.0f);
+			Vector3 c = color.GetColor(i);
+			glColor4f(c.getX(), c.getY(), c.getZ(), 1.0f);
 			glVertex3f(vertices[faces[i].VertexIndex(0)].Point().getX(), vertices[faces[i].VertexIndex(0)].Point().getY(), vertices[faces[i].VertexIndex(0)].Point().getZ());
 			glVertex3f(vertices[faces[i].VertexIndex(1)].Point().getX(), vertices[faces[i].VertexIndex(1)].Point().getY(), vertices[faces[i].VertexIndex(1)].Point().getZ());
 
@@ -41,8 +42,8 @@ void Triangulation::draw()
 	{
 		for (int i = 0; i < faces.size(); i++)
 		{
-			Vector3 color = colors[i % 14];
-			glColor4f(color.getX(), color.getY(), color.getZ(), 0.4f);
+			Vector3 c = color.GetColor(i);
+			glColor4f(c.getX(), c.getY(), c.getZ(), 0.4f);
 			glVertex3f(vertices[faces[i].VertexIndex(0)].Point().getX(), vertices[faces[i].VertexIndex(0)].Point().getY(), vertices[faces[i].VertexIndex(0)].Point().getZ());
 			glVertex3f(vertices[faces[i].VertexIndex(1)].Point().getX(), vertices[faces[i].VertexIndex(1)].Point().getY(), vertices[faces[i].VertexIndex(1)].Point().getZ());
 			glVertex3f(vertices[faces[i].VertexIndex(2)].Point().getX(), vertices[faces[i].VertexIndex(2)].Point().getY(), vertices[faces[i].VertexIndex(2)].Point().getZ());
@@ -56,8 +57,8 @@ void Triangulation::draw()
 		glBegin(GL_POINTS);
 		for (int i = 0; i < voronoisCenters.size(); i++)
 		{
-			Vector3 color = colors[i % 14];
-			glColor4f(color.getX(), color.getY(), color.getZ(), 1.0f);
+			Vector3 c = color.GetColor(i);
+			glColor4f(c.getX(), c.getY(), c.getZ(), 1.0f);
 			glVertex3f(voronoisCenters[i].Point().getX(), voronoisCenters[i].Point().getY(), voronoisCenters[i].Point().getZ());
 		}
 		glEnd();

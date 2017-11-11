@@ -83,26 +83,35 @@ class Triangulation
 private:
 	QVector<Vertex> vertices;
 	QVector<Face> faces;
-	QVector<int> hull;
-	GLenum renderMode;
+	QVector<int> facesModified;
+	QVector<Vertex> voronoisCenters;
 	AABB aabb;
+	GLenum renderMode;
+
+	bool isDelaunay = false;
+	bool isVoronoi = false;
 
 public:
 	Triangulation();
 	void draw();
+
+	/* Fonctions principales */
+	void TriangulationNaive();
+	void DelaunayLawson();
+	void DelaunayLawsonIncremental();
+	void Voronoi();
+	void Crust();
+
+	/* Fonctions utilitaires */
 	void ReadFile();
 	void GenerateCube();
-	void TriangulationNaive();
 	void AddVertex(Vertex v);
 	void CalculateBoundingBox();
 	int CreateFace(int iA, int iB, int iC);
 	int FindFace(Vertex v);
 	void AddVertexToConvexHull(int s);
-	void DelaunayLawson();
-	void DelaunayIncremental(Vertex s);
 	void SplitFace(int f, int s);
 	void FlipEdge(int f, int s);
-	/* Fonctions utilitaires */
 
 	/* Prédicats */
 	double VertexSideLine(Vector3 p1, Vector3 p2, Vector3 p);
@@ -116,10 +125,10 @@ public:
 	FacesIterator EndFace();
 	Vertex BeginVertex();
 	Vertex EndVertex();
-	void IncidentFaces(Vertex& v);
 
 	/* Getteurs / Setteurs */
 	void SetGLRenderMode(GLenum m);
+	void StateVoronoi() { isVoronoi = !isVoronoi; }
 	GLenum GetGLRenderMode() { return renderMode; }
 	QVector<Vertex> Vertices() { return vertices; }
 	QVector<Face> Faces() { return faces; }

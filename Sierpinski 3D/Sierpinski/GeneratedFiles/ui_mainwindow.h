@@ -42,6 +42,7 @@ public:
     QVBoxLayout *verticalLayout;
     QPushButton *button3;
     QPushButton *button4;
+    QPushButton *button5;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -50,7 +51,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(894, 752);
+        MainWindow->resize(894, 783);
         actionSubmenu = new QAction(MainWindow);
         actionSubmenu->setObjectName(QStringLiteral("actionSubmenu"));
         centralWidget = new QWidget(MainWindow);
@@ -103,6 +104,11 @@ public:
 
         verticalLayout->addWidget(button4);
 
+        button5 = new QPushButton(centralWidget);
+        button5->setObjectName(QStringLiteral("button5"));
+
+        verticalLayout->addWidget(button5);
+
 
         horizontalLayout->addLayout(verticalLayout);
 
@@ -134,6 +140,7 @@ public:
         button2->setText(QApplication::translate("MainWindow", "Faces", Q_NULLPTR));
         button3->setText(QApplication::translate("MainWindow", "Delaunay - Lawson", Q_NULLPTR));
         button4->setText(QApplication::translate("MainWindow", "Voronoi", Q_NULLPTR));
+        button5->setText(QApplication::translate("MainWindow", "Crust", Q_NULLPTR));
     } // retranslateUi
 
 };

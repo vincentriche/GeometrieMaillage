@@ -84,7 +84,7 @@ void GLDisplay::mousePressEvent(QMouseEvent *event)
 
 		Vertex v = Vertex(Vector3(pX, pY, 0.0f));
 		mesh.AddVertex(v);
-		mesh.DelaunayIncremental(v);
+		mesh.DelaunayLawsonIncremental();
 		update();
 	}
 }

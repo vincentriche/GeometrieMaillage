@@ -21,6 +21,7 @@ public slots:
 	void DrawFaces();
 	void DelaunayLawson();
 	void Voronoi();
+	void Crust();
 
 private:
 	Ui::MainWindow *ui;

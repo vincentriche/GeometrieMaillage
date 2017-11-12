@@ -85,6 +85,7 @@ private:
 	QVector<Face> faces;
 	QVector<int> facesModified;
 	QVector<Vertex> voronoisCenters;
+	QVector<Vertex> pointsList;
 	AABB aabb;
 	GLenum renderMode;
 	Color color;
@@ -104,7 +105,9 @@ public:
 	void Crust();
 
 	/* Fonctions utilitaires */
-	void ReadFile();
+	void GeneratePoints();
+	void ReadPointsFile(const char* filename);
+	void ReadOffFile();
 	void GenerateCube();
 	void AddVertex(Vertex v);
 	void CalculateBoundingBox();

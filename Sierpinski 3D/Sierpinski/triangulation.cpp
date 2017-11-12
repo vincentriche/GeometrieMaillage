@@ -12,9 +12,11 @@ Triangulation::Triangulation()
 	srand(time(NULL)); 
 	color.InitColors();
 	renderMode = GL_LINES;
-
-	TriangulationNaive();
+	
+	GeneratePoints();
 	CalculateBoundingBox();
+	TriangulationNaive();
+	DelaunayLawson();
 }
 
 void Triangulation::draw()
@@ -66,33 +68,35 @@ void Triangulation::draw()
 }
 
 /* Fonctions principales */
-
 void Triangulation::TriangulationNaive()
 {
 	vertices.clear();
 	faces.clear();
-
-	vertices.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(8.242f, -7.353f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(-5.324f, -9.355f, 0.0f)));
+		
+	/*Vector3 min = aabb.GetMinAABB();
+	Vector3 max = aabb.GetMaxAABB();
+	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, min.getY() + 0.05f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, max.getY() - 0.05f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(max.getX() - 0.05f, min.getY() + 0.05f, 0.0f)));
 	CreateFace(0, 1, 2);
-
-	AddVertex(Vertex(Vector3(6.0f, 0.0f, 0.0f)));
-	AddVertex(Vertex(Vector3(6.0f, -6.0f, 0.0f)));
-	AddVertex(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));
-
+	AddVertex(Vertex(Vector3(max.getX() - 0.05f, max.getY() - 0.05f, 0.0f)));
+	for (int i = 3; i < pointsList.size(); i++)
+		AddVertex(pointsList[i]);*/
+	
+	
+	AddVertex(pointsList[0]);
+	AddVertex(pointsList[1]);
+	AddVertex(pointsList[2]);
+	CreateFace(0, 1, 2);
+	for (int i = 3; i < pointsList.size(); i++)
+		AddVertex(pointsList[i]);
 }
 
 void Triangulation::DelaunayLawson()
 {
 	facesModified.clear();
 	for (int i = 0; i < faces.size(); i++)
-	{
-		Face face = faces[i];
-		facesModified.push_back(face.VertexIndex((0)));
-		facesModified.push_back(face.VertexIndex((1)));
-		facesModified.push_back(face.VertexIndex((2)));
-	}
+		facesModified.push_back(i);
 
 	while (facesModified.empty() == false)
 	{
@@ -187,7 +191,44 @@ void Triangulation::Crust()
 /* Fonctions principales */
 
 /* Fonctions utilitaires */
-void Triangulation::ReadFile()
+void Triangulation::GeneratePoints()
+{
+	//ReadPointsFile("Files\\hand.xy");
+	//ReadPointsFile("Files\\colimacon.xy");
+	//ReadPointsFile("Files\\star_uniform.xy");
+
+	pointsList.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(8.242f, -7.353f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(-5.324f, -9.355f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(6.0f, 0.0f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(6.0f, -6.0f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));
+}
+
+void Triangulation::ReadPointsFile(const char* filename)
+{
+	pointsList.clear();
+
+	QFile inputFile(filename);
+	if (inputFile.open(QIODevice::ReadOnly))
+	{
+		QTextStream in(&inputFile);
+
+		// Première ligne
+		QString line = in.readLine();
+		while (!line.isNull())
+		{
+			line = in.readLine();
+			QStringList  fields = line.split(" ");
+			if (fields[0] > 0 && fields[1] > 0)
+				pointsList.push_back(Vertex(Vector3(fields[0].toDouble(), fields[1].toDouble(), 0.0)));
+
+		}
+		inputFile.close();
+	}
+}
+
+void Triangulation::ReadOffFile()
 {
 	QFile inputFile("queen.off");
 	if (inputFile.open(QIODevice::ReadOnly))
@@ -283,28 +324,28 @@ void Triangulation::AddVertex(Vertex v)
 
 void Triangulation::CalculateBoundingBox()
 {
-	Vector3 min = vertices[0].Point();
-	Vector3 max = vertices[0].Point();
+	Vector3 min = pointsList[0].Point();
+	Vector3 max = pointsList[0].Point();
 
-	for (int i = 1; i < vertices.size(); ++i)
+	for (int i = 1; i < pointsList.size(); ++i)
 	{
-		if (vertices[i].Point().getX() < min.getX())
-			min.setX(vertices[i].Point().getX());
+		if (pointsList[i].Point().getX() < min.getX())
+			min.setX(pointsList[i].Point().getX());
 
-		if (vertices[i].Point().getY() < min.getY())
-			min.setY(vertices[i].Point().getY());
+		if (pointsList[i].Point().getY() < min.getY())
+			min.setY(pointsList[i].Point().getY());
 
-		if (vertices[i].Point().getZ() < min.getZ())
-			min.setZ(vertices[i].Point().getZ());
+		if (pointsList[i].Point().getZ() < min.getZ())
+			min.setZ(pointsList[i].Point().getZ());
 
-		if (vertices[i].Point().getX() > max.getX())
-			max.setX(vertices[i].Point().getX());
+		if (pointsList[i].Point().getX() > max.getX())
+			max.setX(pointsList[i].Point().getX());
 
-		if (vertices[i].Point().getY() > max.getY())
-			max.setY(vertices[i].Point().getY());
+		if (pointsList[i].Point().getY() > max.getY())
+			max.setY(pointsList[i].Point().getY());
 
-		if (vertices[i].Point().getZ() > max.getZ())
-			max.setZ(vertices[i].Point().getZ());
+		if (pointsList[i].Point().getZ() > max.getZ())
+			max.setZ(pointsList[i].Point().getZ());
 	}
 	aabb.SetMinAABB(min - Vector3(0.5f));
 	aabb.SetMaxAABB(max + Vector3(0.5f));

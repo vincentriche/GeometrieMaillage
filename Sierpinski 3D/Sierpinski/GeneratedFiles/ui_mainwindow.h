@@ -43,6 +43,7 @@ public:
     QPushButton *button3;
     QPushButton *button4;
     QPushButton *button5;
+    QPushButton *button6;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -51,7 +52,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(894, 783);
+        MainWindow->resize(894, 812);
         actionSubmenu = new QAction(MainWindow);
         actionSubmenu->setObjectName(QStringLiteral("actionSubmenu"));
         centralWidget = new QWidget(MainWindow);
@@ -109,6 +110,11 @@ public:
 
         verticalLayout->addWidget(button5);
 
+        button6 = new QPushButton(centralWidget);
+        button6->setObjectName(QStringLiteral("button6"));
+
+        verticalLayout->addWidget(button6);
+
 
         horizontalLayout->addLayout(verticalLayout);
 
@@ -138,9 +144,10 @@ public:
         actionSubmenu->setText(QApplication::translate("MainWindow", "submenu", Q_NULLPTR));
         button1->setText(QApplication::translate("MainWindow", "Wireframe", Q_NULLPTR));
         button2->setText(QApplication::translate("MainWindow", "Faces", Q_NULLPTR));
-        button3->setText(QApplication::translate("MainWindow", "Delaunay - Lawson", Q_NULLPTR));
+        button3->setText(QApplication::translate("MainWindow", "Delaunay -  Lawson", Q_NULLPTR));
         button4->setText(QApplication::translate("MainWindow", "Voronoi", Q_NULLPTR));
-        button5->setText(QApplication::translate("MainWindow", "Crust", Q_NULLPTR));
+        button5->setText(QApplication::translate("MainWindow", "Add Voronoi to Triangulation", Q_NULLPTR));
+        button6->setText(QApplication::translate("MainWindow", "Crust", Q_NULLPTR));
     } // retranslateUi
 
 };

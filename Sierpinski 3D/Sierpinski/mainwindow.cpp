@@ -10,7 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->button2, SIGNAL(released()), this, SLOT(DrawFaces()));
 	connect(ui->button3, SIGNAL(released()), this, SLOT(DelaunayLawson()));
 	connect(ui->button4, SIGNAL(released()), this, SLOT(Voronoi()));
-	connect(ui->button5, SIGNAL(released()), this, SLOT(Crust()));
+	connect(ui->button5, SIGNAL(released()), this, SLOT(AddVoronoi()));
+	connect(ui->button6, SIGNAL(released()), this, SLOT(Crust()));
 }
 
 MainWindow::~MainWindow()
@@ -38,13 +39,20 @@ void MainWindow::DelaunayLawson()
 
 void MainWindow::Voronoi()
 {
-	ui->openGLWidget->GetTriangulation().StateVoronoi();
-	ui->openGLWidget->GetTriangulation().Voronoi();
+	ui->openGLWidget->GetTriangulation().ToggleVoronoi();
+	if (ui->openGLWidget->GetTriangulation().isVoronoi == true)
+		ui->openGLWidget->GetTriangulation().Voronoi();
+	ui->openGLWidget->update();
+}
+
+void MainWindow::AddVoronoi()
+{
+	ui->openGLWidget->GetTriangulation().AddVoronoi();
 	ui->openGLWidget->update();
 }
 
 void MainWindow::Crust()
 {
-	ui->openGLWidget->GetTriangulation().Crust();
+	ui->openGLWidget->GetTriangulation().ToggleCrust();
 	ui->openGLWidget->update();
 }

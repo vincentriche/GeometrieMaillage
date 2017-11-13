@@ -18,14 +18,16 @@ class Vertex
 private:
 	Vector3 p;
 	int adjacentFace;
+	bool isVoronoi;
 
 public:
-	Vertex() : p(0.0) {}
-	Vertex(Vector3 p) : p(p) {}
-	Vertex(Vector3 p, int adjacentFace) : p(p), adjacentFace(adjacentFace) {}
+	Vertex() : p(0.0) { isVoronoi = false; }
+	Vertex(Vector3 p) : p(p) { isVoronoi = false; }
+	Vertex(Vector3 p, int adjacentFace) : p(p), adjacentFace(adjacentFace) { isVoronoi == false; }
 
 	Vector3& Point() { return p; }
 	int& AdjacentFace() { return adjacentFace; }
+	bool& IsVoronoi() { return isVoronoi; }
 };
 
 struct Edge
@@ -81,19 +83,20 @@ public:
 class Triangulation
 {
 private:
+	QVector<Vertex> pointsList;
 	QVector<Vertex> vertices;
 	QVector<Face> faces;
 	QVector<int> facesModified;
-	QVector<Vertex> voronoisCenters;
-	QVector<Vertex> pointsList;
+	QVector<Vertex> voronoisVertices;
 	AABB aabb;
 	GLenum renderMode;
 	Color color;
-
+	
+public:
 	bool isDelaunay = false;
 	bool isVoronoi = false;
+	bool isCrust = false;
 
-public:
 	Triangulation();
 	void draw();
 
@@ -102,7 +105,7 @@ public:
 	void DelaunayLawson();
 	void DelaunayLawsonIncremental();
 	void Voronoi();
-	void Crust();
+	void AddVoronoi();
 
 	/* Fonctions utilitaires */
 	void GeneratePoints();
@@ -132,7 +135,8 @@ public:
 
 	/* Getteurs / Setteurs */
 	void SetGLRenderMode(GLenum m);
-	void StateVoronoi() { isVoronoi = !isVoronoi; }
+	void ToggleVoronoi() { isVoronoi = !isVoronoi; }
+	void ToggleCrust() { isCrust = !isCrust; }
 	GLenum GetGLRenderMode() { return renderMode; }
 	QVector<Vertex> Vertices() { return vertices; }
 	QVector<Face> Faces() { return faces; }

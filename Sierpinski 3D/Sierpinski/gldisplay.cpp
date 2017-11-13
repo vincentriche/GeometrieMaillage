@@ -33,7 +33,7 @@ void GLDisplay::resizeGL(int w, int h)
 
 	glViewport(0, 0, w, h);
 
-
+	glLoadIdentity();
 	glOrtho((float)mesh.AABB().GetMinAABB().getX(), (float)mesh.AABB().GetMaxAABB().getX(),
 		(float)mesh.AABB().GetMinAABB().getY(), (float)mesh.AABB().GetMaxAABB().getY(),
 		-2.0f, 100.f);

@@ -21,6 +21,7 @@ public slots:
 	void DrawFaces();
 	void DelaunayLawson();
 	void Voronoi();
+	void AddVoronoi();
 	void Crust();
 
 private:

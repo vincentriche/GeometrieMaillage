@@ -9,10 +9,10 @@ using namespace std;
 
 Triangulation::Triangulation()
 {
-	srand(time(NULL)); 
+	srand(time(NULL));
 	color.InitColors();
 	renderMode = GL_LINES;
-	
+
 	GeneratePoints();
 	CalculateBoundingBox();
 	TriangulationNaive();
@@ -23,6 +23,7 @@ void Triangulation::draw()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glBegin(renderMode);
 	if (renderMode == GL_LINES)
 	{
@@ -57,11 +58,42 @@ void Triangulation::draw()
 	{
 		glPointSize(10.0);
 		glBegin(GL_POINTS);
-		for (int i = 0; i < voronoisCenters.size(); i++)
+		for (int i = 0; i < voronoisVertices.size(); i++)
 		{
 			Vector3 c = color.GetColor(i);
 			glColor4f(c.getX(), c.getY(), c.getZ(), 1.0f);
-			glVertex3f(voronoisCenters[i].Point().getX(), voronoisCenters[i].Point().getY(), voronoisCenters[i].Point().getZ());
+			glVertex3f(voronoisVertices[i].Point().getX(), voronoisVertices[i].Point().getY(), voronoisVertices[i].Point().getZ());
+		}
+		glEnd();
+	}
+
+	if (isCrust == true)
+	{
+		glBegin(GL_LINES);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		for (int i = 0; i < faces.size(); i++)
+		{
+			Vertex p0 = vertices[faces[i].VertexIndex(0)];
+			Vertex p1 = vertices[faces[i].VertexIndex(1)];
+			Vertex p2 = vertices[faces[i].VertexIndex(2)];
+
+			if (p0.IsVoronoi() == false && p1.IsVoronoi() == false)
+			{
+				glVertex3f(p0.Point().getX(), p0.Point().getY(), p0.Point().getZ());
+				glVertex3f(p1.Point().getX(), p1.Point().getY(), p1.Point().getZ());
+			}
+
+			if (p1.IsVoronoi() == false && p2.IsVoronoi() == false)
+			{
+				glVertex3f(p1.Point().getX(), p1.Point().getY(), p1.Point().getZ());
+				glVertex3f(p2.Point().getX(), p2.Point().getY(), p2.Point().getZ());
+			}
+
+			if (p2.IsVoronoi() == false && p0.IsVoronoi() == false)
+			{
+				glVertex3f(p2.Point().getX(), p2.Point().getY(), p2.Point().getZ());
+				glVertex3f(p0.Point().getX(), p0.Point().getY(), p0.Point().getZ());
+			}
 		}
 		glEnd();
 	}
@@ -72,24 +104,26 @@ void Triangulation::TriangulationNaive()
 {
 	vertices.clear();
 	faces.clear();
-		
-	/*Vector3 min = aabb.GetMinAABB();
+
+	Vector3 min = aabb.GetMinAABB();
 	Vector3 max = aabb.GetMaxAABB();
 	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, min.getY() + 0.05f, 0.0f)));
 	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, max.getY() - 0.05f, 0.0f)));
 	vertices.push_back(Vertex(Vector3(max.getX() - 0.05f, min.getY() + 0.05f, 0.0f)));
 	CreateFace(0, 1, 2);
-	AddVertex(Vertex(Vector3(max.getX() - 0.05f, max.getY() - 0.05f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(max.getX() - 0.05f, max.getY() - 0.05f, 0.0f)));
+	CreateFace(1, 3, 2);
+	
 	for (int i = 3; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);*/
-	
-	
-	AddVertex(pointsList[0]);
+		AddVertex(pointsList[i]);
+
+
+	/*AddVertex(pointsList[0]);
 	AddVertex(pointsList[1]);
 	AddVertex(pointsList[2]);
 	CreateFace(0, 1, 2);
 	for (int i = 3; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);
+		AddVertex(pointsList[i]);*/
 }
 
 void Triangulation::DelaunayLawson()
@@ -157,7 +191,7 @@ void Triangulation::Voronoi()
 	if (isDelaunay == false)
 		DelaunayLawson();
 
-	voronoisCenters.clear();
+	voronoisVertices.clear();
 	for (int i = 0; i < faces.size(); i++)
 	{
 		Vector3 p0 = vertices[faces[i].VertexIndex(0)].Point();
@@ -179,14 +213,22 @@ void Triangulation::Voronoi()
 			p1XY * (p0.getX() - p2.getX()) +
 			p2XY * (p1.getX() - p0.getX()));
 
-		voronoisCenters.push_back(Vector3(uX, uY, 0.0));
+		voronoisVertices.push_back(Vector3(uX, uY, 0.0f));
 	}
 	isVoronoi = true;
 }
 
-void Triangulation::Crust()
+void Triangulation::AddVoronoi()
 {
-
+	if (voronoisVertices.size() == 0)
+		return;
+	
+	for (int i = 0; i < voronoisVertices.size(); i++)
+	{
+		AddVertex(voronoisVertices[i]);
+		vertices[vertices.size() - 1].IsVoronoi() = true;
+	}
+	DelaunayLawsonIncremental();
 }
 /* Fonctions principales */
 
@@ -195,14 +237,14 @@ void Triangulation::GeneratePoints()
 {
 	//ReadPointsFile("Files\\hand.xy");
 	//ReadPointsFile("Files\\colimacon.xy");
-	//ReadPointsFile("Files\\star_uniform.xy");
+	ReadPointsFile("Files\\star_uniform.xy");
 
-	pointsList.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
+	/*pointsList.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
 	pointsList.push_back(Vertex(Vector3(8.242f, -7.353f, 0.0f)));
 	pointsList.push_back(Vertex(Vector3(-5.324f, -9.355f, 0.0f)));
 	pointsList.push_back(Vertex(Vector3(6.0f, 0.0f, 0.0f)));
 	pointsList.push_back(Vertex(Vector3(6.0f, -6.0f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));
+	pointsList.push_back(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));*/
 }
 
 void Triangulation::ReadPointsFile(const char* filename)
@@ -417,12 +459,6 @@ void Triangulation::SplitFace(int f, int s)
 	int idFaceC = faces.size();
 	faces.push_back(faceC);
 
-	vertices[s].AdjacentFace() = idFaceA;
-	if (vertices[face.VertexIndex(1)].AdjacentFace() == idFaceA)
-		vertices[face.VertexIndex(1)].AdjacentFace() = idFaceB;
-	if (vertices[face.VertexIndex(2)].AdjacentFace() == idFaceA)
-		vertices[face.VertexIndex(2)].AdjacentFace() = idFaceC;
-
 	faces[idFaceA].FaceIndex(0, idFaceC);
 	faces[idFaceA].FaceIndex(1, face.FaceIndex(2));
 	faces[idFaceA].FaceIndex(2, idFaceB);
@@ -511,11 +547,6 @@ void Triangulation::FlipEdge(int fA, int fB)
 
 	Face newFaceA(idVertex0, idVertex2, idVertex1);
 	Face newFaceB(idVertex1, idVertex3, idVertex0);
-
-	if (vertices[idVertex2].AdjacentFace() == fB)
-		vertices[idVertex2].AdjacentFace() = fA;
-	if (vertices[idVertex3].AdjacentFace() == fA)
-		vertices[idVertex3].AdjacentFace() = fB;
 
 	int idFace0 = faceA.FaceIndex((localFaceA + 2) % 3);
 	int idFace1 = faceB.FaceIndex((localFaceB + 1) % 3);

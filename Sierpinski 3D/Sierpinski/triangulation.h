@@ -21,8 +21,8 @@ private:
 	bool isVoronoi;
 
 public:
-	Vertex() : p(0.0) { isVoronoi = false; }
-	Vertex(Vector3 p) : p(p) { isVoronoi = false; }
+	Vertex() : p(Vector3(0.0, 0.0, 0.0)), adjacentFace(0){ isVoronoi = false; }
+	Vertex(Vector3 p) : p(p), adjacentFace(0) { isVoronoi = false; }
 	Vertex(Vector3 p, int adjacentFace) : p(p), adjacentFace(adjacentFace) { isVoronoi == false; }
 
 	Vector3& Point() { return p; }
@@ -33,23 +33,39 @@ public:
 struct Edge
 {
 private:
-	int vertexA;
-	int vertexB;
+	int vA;
+	int vB;
 
 public:
 	Edge() {}
-	Edge(int a, int b) : vertexA(a), vertexB(b) {}
+	Edge(int a, int b) : vA(a), vB(b) {}
+	
+	int VertexIndex(int i)
+	{
+		if (i == 0)
+			return vA;
+		if (i == 1)
+			return vB;
+	}
+
+	void VertexIndex(int i, int v)
+	{
+		if (i == 0)
+			vA = v;
+		if (i == 1)
+			vB = v;
+	}
 
 	bool operator< (const Edge& e) const
 	{
-		return (this->vertexA < e.vertexA && this->vertexB == e.vertexB) ||
-			(this->vertexB == e.vertexA && this->vertexA == e.vertexB);
+		return (this->vA < e.vA && this->vB == e.vB) ||
+			(this->vB == e.vA && this->vA == e.vB);
 	}
 
 	bool operator == (const Edge& e)
 	{
-		if ((this->vertexA == e.vertexA && this->vertexB == e.vertexB) ||
-			(this->vertexB == e.vertexA && this->vertexA == e.vertexB))
+		if ((this->vA == e.vA && this->vB == e.vB) ||
+			(this->vB == e.vA && this->vA == e.vB))
 			return true;
 		return false;
 	}
@@ -78,6 +94,38 @@ public:
 	{
 		return (iA == b.iA && iB == b.iB && iC == b.iC && fA == b.fA && fB == b.fB && fC == b.fC);
 	}
+
+
+	int GetLastVertex(int s0, int s1)
+	{
+		if (s0 == iA || s1 == iA)
+		{
+			if (s0 == iB || s1 == iB)
+				return iC;
+			else
+				return iB;
+		}
+		else
+			return iA;
+	}
+
+	std::vector<std::pair<int, int>> ExteriorVerticesPair()
+	{
+		std::vector<std::pair<int, int>> ret;
+		if (fA == -1)
+		{
+			ret.push_back(std::pair<int, int>(1, 2));
+		}
+		if (fB == -1)
+		{
+			ret.push_back(std::pair<int, int>(2, 0));
+		}
+		if (fC == -1)
+		{
+			ret.push_back(std::pair<int, int>(0, 1));
+		}
+		return ret;
+	}
 };
 
 class Triangulation
@@ -91,7 +139,7 @@ private:
 	AABB aabb;
 	GLenum renderMode;
 	Color color;
-	
+
 public:
 	bool isDelaunay = false;
 	bool isVoronoi = false;
@@ -116,7 +164,6 @@ public:
 	void CalculateBoundingBox();
 	int CreateFace(int iA, int iB, int iC);
 	int FindFace(Vertex v);
-	void AddVertexToConvexHull(int s);
 	void SplitFace(int f, int s);
 	void FlipEdge(int f, int s);
 

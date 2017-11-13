@@ -24,6 +24,7 @@ void Triangulation::draw()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glLineWidth(1.0f);
 	glBegin(renderMode);
 	if (renderMode == GL_LINES)
 	{
@@ -69,6 +70,7 @@ void Triangulation::draw()
 
 	if (isCrust == true)
 	{
+		glLineWidth(2.0f);
 		glBegin(GL_LINES);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		for (int i = 0; i < faces.size(); i++)
@@ -105,25 +107,31 @@ void Triangulation::TriangulationNaive()
 	vertices.clear();
 	faces.clear();
 
+	float offset = 2.0f;
 	Vector3 min = aabb.GetMinAABB();
 	Vector3 max = aabb.GetMaxAABB();
-	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, min.getY() + 0.05f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(min.getX() + 0.05f, max.getY() - 0.05f, 0.0f)));
-	vertices.push_back(Vertex(Vector3(max.getX() - 0.05f, min.getY() + 0.05f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(min.getX() - offset, min.getY() - offset, 0.0f)));
+	vertices.push_back(Vertex(Vector3(min.getX() - offset, max.getY() + offset, 0.0f)));
+	vertices.push_back(Vertex(Vector3(max.getX() + offset, min.getY() - offset, 0.0f)));
 	CreateFace(0, 1, 2);
-	vertices.push_back(Vertex(Vector3(max.getX() - 0.05f, max.getY() - 0.05f, 0.0f)));
+	vertices.push_back(Vertex(Vector3(max.getX() + offset, max.getY() + offset, 0.0f)));
 	CreateFace(1, 3, 2);
+
+	faces[0].FaceIndex(2, 1);
+	faces[1].FaceIndex(1, 0);
 	
 	for (int i = 3; i < pointsList.size(); i++)
 		AddVertex(pointsList[i]);
 
-
-	/*AddVertex(pointsList[0]);
+	//AddVertex(Vertex(Vector3(0.0f, -0.5f, 0.0f)));
+	/*
+	AddVertex(pointsList[0]);
 	AddVertex(pointsList[1]);
 	AddVertex(pointsList[2]);
 	CreateFace(0, 1, 2);
 	for (int i = 3; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);*/
+		AddVertex(pointsList[i]);
+	*/
 }
 
 void Triangulation::DelaunayLawson()
@@ -222,7 +230,7 @@ void Triangulation::AddVoronoi()
 {
 	if (voronoisVertices.size() == 0)
 		return;
-	
+
 	for (int i = 0; i < voronoisVertices.size(); i++)
 	{
 		AddVertex(voronoisVertices[i]);
@@ -360,7 +368,7 @@ void Triangulation::AddVertex(Vertex v)
 	}
 	if (found == false)
 	{
-		AddVertexToConvexHull(i);
+		//AddVertexToConvexHull(i);
 	}
 }
 
@@ -415,38 +423,10 @@ int Triangulation::FindFace(Vertex v)
 	return -1;
 }
 
-void Triangulation::AddVertexToConvexHull(int s)
-{
-	//Vertex p = Vertices()[s];
-
-	//for (int i = 0; i < hull.size(); i++)
-	//{
-	//	int s1 = hull[i];
-	//	int s2 = hull[(i + 1) % hull.size()];
-	//	Vertex p1 = Vertices()[s1];
-	//	Vertex p2 = Vertices()[s2];
-
-	//	if (VertexSideLine(p1.Point(), p2.Point(), p.Point()) > 0.0f)
-	//	{
-	//		//CreateFace(s1, s, s2);
-
-	//		/*
-	//		Circulateur_de_faces circulateur(this, hull[s1]);
-	//		int vertexA = -1;
-	//		int vertexB = -1;
-	//		int c = -1;
-	//		while (vertexA == -1 || vertexB == -1)
-	//		{
-	//		c = *circulateur;
-	//		}
-	//		*/
-	//	}
-	//}
-}
-
 void Triangulation::SplitFace(int f, int s)
 {
 	Face face = faces[f];
+
 	Face faceA = Face(face.VertexIndex(1), s, face.VertexIndex(0));
 	int idFaceA = f;
 	faces[idFaceA] = faceA;
@@ -496,44 +476,6 @@ void Triangulation::SplitFace(int f, int s)
 
 void Triangulation::FlipEdge(int fA, int fB)
 {
-	/*
-	// Flip
-	Face faceA = faces[fA];
-	Face faceB = faces[fB];
-
-	//Les indices locaux des sommets adjacents(voisins) aux faces
-	int sA = faceA.LocalFaceIndex(fB);
-	int sB = faceB.LocalFaceIndex(fA);
-
-	//Voisins de A et B à mettre à jour
-	int iFaceK = faceA.FaceIndex((sA + 2) % 3); //Voisin de A
-	int iFaceL = faceB.FaceIndex((sB + 2) % 3); //Voisin de B
-	Face faceK = faces[iFaceK];
-	Face faceL = faces[iFaceL];
-
-	//Les indices locaux des sommets voisins dans les triangles
-	int sK = faceK.LocalFaceIndex(fA);
-	int sL = faceL.LocalFaceIndex(fB);
-
-	//Les indices globaux avec la fonction WorldVertexIndex
-	Face nFaceA(faceA.VertexIndex(sA), faceA.VertexIndex((sA + 1) % 3), faceB.VertexIndex(sB));
-	Face nFaceB(faceB.VertexIndex(sB), faceB.VertexIndex((sB + 1) % 3), faceA.VertexIndex(sA));
-
-	//Mise à jour voisin des deux premières faces
-	nFaceA.FaceIndex(0) = iFaceL;
-	nFaceA.FaceIndex(1) = faceA.FaceIndex(1);
-	nFaceA.FaceIndex(2) = faceA.FaceIndex(2);
-	nFaceB.FaceIndex(0) = iFaceK;
-	nFaceB.FaceIndex(1) = faceB.FaceIndex(1);
-	nFaceB.FaceIndex(2) = faceB.FaceIndex(2);
-
-	// Update Voisins faces
-	faceK.FaceIndex = (sK, fB);
-	faceL.FaceIndex = (sL, fA);
-	faces[fA] = nFaceA;
-	faces[fB] = nFaceB;
-	*/
-
 	Face faceA = faces[fA];
 	Face faceB = faces[fB];
 

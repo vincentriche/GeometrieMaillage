@@ -1,6 +1,9 @@
 #include "utilities.h"
 #include <atlbase.h>
 
+/*
+	Calcul le produit vectoriel entre deux Vector3.
+*/
 Vector3 Vector3::CrossProduct(const Vector3& u, const Vector3& v)
 {
 	return Vector3(
@@ -9,11 +12,17 @@ Vector3 Vector3::CrossProduct(const Vector3& u, const Vector3& v)
 		(u.x * v.y) - (u.y * v.x));
 }
 
+/*
+	Calcul le produit scalaire entre deux Vector3.
+*/
 float Vector3::DotProduct(const Vector3& u, const Vector3& v)
 {
 	return u.x * v.x + u.y * v.y + u.z * v.z;
 }
 
+/*
+	Calcul la magnitude ou longueur d'un Vector3.
+*/
 float Vector3::Magnitude(const Vector3& u)
 {
 	return u.x * u.x + u.y * u.y + u.z * u.z;
@@ -34,6 +43,9 @@ Vector3 Vector3::operator+(const Vector3& v) const
 	return Vector3(x + v.x, y + v.y, z + v.z);
 }
 
+/*
+	Initialise les différentes couleurs d'affichages.
+*/
 void Color::InitColors()
 {
 	colors.push_back(ConvertHexColor("00FFFF"));
@@ -64,6 +76,9 @@ void Color::InitColors()
 	colors.push_back(ConvertHexColor("483D8B"));
 }
 
+/*
+	Convertit une couleur hexadécimal en RGB (0 -> 1).
+*/
 Vector3 Color::ConvertHexColor(const char* hex)
 {
 	int r, g, b;

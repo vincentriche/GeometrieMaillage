@@ -5,7 +5,7 @@
 #include "gldisplay.h"
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -16,7 +16,7 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
-public slots:
+	public slots:
 	void DrawWireframe();
 	void DrawFaces();
 	void DelaunayLawson();

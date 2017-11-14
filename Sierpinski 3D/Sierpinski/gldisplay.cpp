@@ -56,6 +56,9 @@ void GLDisplay::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
+/*
+	Récupère la position du clic souris pour ajouter un point dans la triangulation.
+*/
 void GLDisplay::mousePressEvent(QMouseEvent *event)
 {
 	if (event == NULL)

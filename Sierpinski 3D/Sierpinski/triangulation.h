@@ -21,9 +21,9 @@ private:
 	bool isVoronoi;
 
 public:
-	Vertex() : p(Vector3(0.0, 0.0, 0.0)), adjacentFace(0){ isVoronoi = false; }
+	Vertex() : p(Vector3(0.0, 0.0, 0.0)), adjacentFace(0) { isVoronoi = false; }
 	Vertex(Vector3 p) : p(p), adjacentFace(0) { isVoronoi = false; }
-	Vertex(Vector3 p, int adjacentFace) : p(p), adjacentFace(adjacentFace) { isVoronoi == false; }
+	Vertex(Vector3 p, int adjacentFace) : p(p), adjacentFace(adjacentFace) { isVoronoi = false; }
 
 	Vector3& Point() { return p; }
 	int& AdjacentFace() { return adjacentFace; }
@@ -39,7 +39,7 @@ private:
 public:
 	Edge() {}
 	Edge(int a, int b) : vA(a), vB(b) {}
-	
+
 	int VertexIndex(int i)
 	{
 		if (i == 0)
@@ -94,38 +94,6 @@ public:
 	{
 		return (iA == b.iA && iB == b.iB && iC == b.iC && fA == b.fA && fB == b.fB && fC == b.fC);
 	}
-
-
-	int GetLastVertex(int s0, int s1)
-	{
-		if (s0 == iA || s1 == iA)
-		{
-			if (s0 == iB || s1 == iB)
-				return iC;
-			else
-				return iB;
-		}
-		else
-			return iA;
-	}
-
-	std::vector<std::pair<int, int>> ExteriorVerticesPair()
-	{
-		std::vector<std::pair<int, int>> ret;
-		if (fA == -1)
-		{
-			ret.push_back(std::pair<int, int>(1, 2));
-		}
-		if (fB == -1)
-		{
-			ret.push_back(std::pair<int, int>(2, 0));
-		}
-		if (fC == -1)
-		{
-			ret.push_back(std::pair<int, int>(0, 1));
-		}
-		return ret;
-	}
 };
 
 class Triangulation
@@ -149,19 +117,19 @@ public:
 	void draw();
 
 	/* Fonctions principales */
-	void TriangulationNaive();
+	void NaiveTriangulation();
 	void DelaunayLawson();
 	void DelaunayLawsonIncremental();
 	void Voronoi();
 	void AddVoronoi();
 
 	/* Fonctions utilitaires */
-	void GeneratePoints();
 	void ReadPointsFile(const char* filename);
 	void ReadOffFile();
 	void GenerateCube();
-	void AddVertex(Vertex v);
 	void CalculateBoundingBox();
+	void AddVertex(Vertex v);
+	void AddVertexToConvexHull(int s);
 	int CreateFace(int iA, int iB, int iC);
 	int FindFace(Vertex v);
 	void SplitFace(int f, int s);
@@ -171,7 +139,7 @@ public:
 	double VertexSideLine(Vector3 p1, Vector3 p2, Vector3 p);
 	bool IsInFace(Face f, Vector3 p);
 	bool IsInCircumcircle(int f, Vector3 s);
-	bool isTrianglesConvex(int fA, int fB);
+	bool IsTrianglesConvex(int fA, int fB);
 
 
 	/* Surcharges d'opérateurs */
@@ -201,6 +169,8 @@ public:
 	FacesIterator() {}
 	FacesIterator(Triangulation& t) : triangulation(&t) {}
 	FacesIterator(Triangulation& t, int n) : triangulation(&t), index(n) {}
+	~FacesIterator() { delete triangulation; }
+
 	void operator++();
 	Face operator*();
 };
@@ -215,6 +185,8 @@ public:
 	VerticesIterator() {}
 	VerticesIterator(Triangulation& t) : triangulation(&t) {}
 	VerticesIterator(Triangulation& t, int n) : triangulation(&t), index(n) {}
+	~VerticesIterator() { delete triangulation; delete sommet; }
+
 	void operator++();
 	Vertex operator*();
 };
@@ -231,6 +203,8 @@ public:
 	{
 		currentFace = triangulation->Vertices()[currentVertex].AdjacentFace();
 	}
+	~FacesCirculator() { delete triangulation; }
+
 	const int operator*() { return currentFace; }
 	const FacesCirculator& operator++()
 	{

@@ -13,10 +13,7 @@ Triangulation::Triangulation()
 	color.InitColors();
 	renderMode = GL_LINES;
 
-	GeneratePoints();
-	CalculateBoundingBox();
-	TriangulationNaive();
-	DelaunayLawson();
+	NaiveTriangulation();
 }
 
 void Triangulation::draw()
@@ -102,10 +99,22 @@ void Triangulation::draw()
 }
 
 /* Fonctions principales */
-void Triangulation::TriangulationNaive()
+/*
+	Triangulation Navie : Initilisation des premières faces et ajout des points.
+
+	Pas de convex hull. On crée un quad qui sert de bounding box pour contenir tous les futures points.
+	Si ReadFile(filename) n'est pas appelé, on crée la BB et les points seront ajouté par l'utilisateur avec la souris.
+*/
+void Triangulation::NaiveTriangulation()
 {
+	pointsList.clear();
 	vertices.clear();
 	faces.clear();
+
+	ReadPointsFile("Files\\hand.xy");
+	//ReadPointsFile("Files\\colimacon.xy");
+	//ReadPointsFile("Files\\star_uniform.xy");
+	CalculateBoundingBox();
 
 	float offset = 2.0f;
 	Vector3 min = aabb.GetMinAABB();
@@ -119,21 +128,18 @@ void Triangulation::TriangulationNaive()
 
 	faces[0].FaceIndex(2, 1);
 	faces[1].FaceIndex(1, 0);
-	
-	for (int i = 3; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);
 
-	//AddVertex(Vertex(Vector3(0.0f, -0.5f, 0.0f)));
-	/*
-	AddVertex(pointsList[0]);
-	AddVertex(pointsList[1]);
-	AddVertex(pointsList[2]);
-	CreateFace(0, 1, 2);
-	for (int i = 3; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);
-	*/
+	if (pointsList.size() > 0)
+	{
+		for (int i = 0; i < pointsList.size(); i++)
+			AddVertex(pointsList[i]);
+		DelaunayLawson();
+	}
 }
 
+/*
+	Passage en triangulation de Delaunay par Lawson.
+*/
 void Triangulation::DelaunayLawson()
 {
 	facesModified.clear();
@@ -148,7 +154,7 @@ void Triangulation::DelaunayLawson()
 		for (int j = 0; j < 3; j++)
 		{
 			int fB = face.FaceIndex(j);
-			if (fB == -1 || isTrianglesConvex(f, fB) == false)
+			if (fB == -1 || IsTrianglesConvex(f, fB) == false)
 				continue;
 
 			Face faceB = faces[fB];
@@ -165,6 +171,9 @@ void Triangulation::DelaunayLawson()
 		Voronoi();
 }
 
+/*
+	Passage en triangulation de Delaunay quand on ajoute un nouveau point (Delaunay Incrémental).
+*/
 void Triangulation::DelaunayLawsonIncremental()
 {
 	while (facesModified.empty() == false)
@@ -175,7 +184,7 @@ void Triangulation::DelaunayLawsonIncremental()
 		for (int j = 0; j < 3; j++)
 		{
 			int fB = face.FaceIndex(j);
-			if (fB == -1 || isTrianglesConvex(f, fB) == false)
+			if (fB == -1 || IsTrianglesConvex(f, fB) == false)
 				continue;
 
 			Face faceB = faces[fB];
@@ -191,6 +200,9 @@ void Triangulation::DelaunayLawsonIncremental()
 		Voronoi();
 }
 
+/*
+	Calcul des centres de voronois sur une triangulation de Delaunay.
+*/
 void Triangulation::Voronoi()
 {
 	if (isVoronoi == false)
@@ -226,6 +238,9 @@ void Triangulation::Voronoi()
 	isVoronoi = true;
 }
 
+/*
+	Ajoute les centres de voronois à la triangulation et repasse en triangulation de Delaunay.
+*/
 void Triangulation::AddVoronoi()
 {
 	if (voronoisVertices.size() == 0)
@@ -240,21 +255,11 @@ void Triangulation::AddVoronoi()
 }
 /* Fonctions principales */
 
+
 /* Fonctions utilitaires */
-void Triangulation::GeneratePoints()
-{
-	//ReadPointsFile("Files\\hand.xy");
-	//ReadPointsFile("Files\\colimacon.xy");
-	ReadPointsFile("Files\\star_uniform.xy");
-
-	/*pointsList.push_back(Vertex(Vector3(7.75f, 8.0f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(8.242f, -7.353f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(-5.324f, -9.355f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(6.0f, 0.0f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(6.0f, -6.0f, 0.0f)));
-	pointsList.push_back(Vertex(Vector3(7.4560f, -5.689f, 0.0f)));*/
-}
-
+/*
+	Lit le fichier en paramètres et remplit le Qvector de points à traiter.
+*/
 void Triangulation::ReadPointsFile(const char* filename)
 {
 	pointsList.clear();
@@ -278,6 +283,9 @@ void Triangulation::ReadPointsFile(const char* filename)
 	}
 }
 
+/*
+	Lit le fichier Off en paramètre et en remplit les Qvector de faces et vertices.
+*/
 void Triangulation::ReadOffFile()
 {
 	QFile inputFile("queen.off");
@@ -312,6 +320,9 @@ void Triangulation::ReadOffFile()
 	}
 }
 
+/*
+	Génère un cube 2D.
+*/
 void Triangulation::GenerateCube()
 {
 	// Vertices face avant
@@ -352,6 +363,44 @@ void Triangulation::GenerateCube()
 	faces.push_back(Face(7, 4, 0));
 }
 
+/*
+	Calcule la bounding box de la liste de points à traiter points.
+*/
+void Triangulation::CalculateBoundingBox()
+{
+	if (pointsList.size() > 0)
+	{
+		Vector3 min = pointsList[0].Point();
+		Vector3 max = pointsList[0].Point();
+
+		for (int i = 1; i < pointsList.size(); ++i)
+		{
+			if (pointsList[i].Point().getX() < min.getX())
+				min.setX(pointsList[i].Point().getX());
+
+			if (pointsList[i].Point().getY() < min.getY())
+				min.setY(pointsList[i].Point().getY());
+
+			if (pointsList[i].Point().getZ() < min.getZ())
+				min.setZ(pointsList[i].Point().getZ());
+
+			if (pointsList[i].Point().getX() > max.getX())
+				max.setX(pointsList[i].Point().getX());
+
+			if (pointsList[i].Point().getY() > max.getY())
+				max.setY(pointsList[i].Point().getY());
+
+			if (pointsList[i].Point().getZ() > max.getZ())
+				max.setZ(pointsList[i].Point().getZ());
+		}
+		aabb.SetMinAABB(min - Vector3(0.5f));
+		aabb.SetMaxAABB(max + Vector3(0.5f));
+	}
+}
+
+/*
+	Ajoute un vertex à la triangulation, met à jours l'enveloppe convexe si le point est en dehors.
+*/
 void Triangulation::AddVertex(Vertex v)
 {
 	int i = vertices.size();
@@ -368,39 +417,23 @@ void Triangulation::AddVertex(Vertex v)
 	}
 	if (found == false)
 	{
-		//AddVertexToConvexHull(i);
+		AddVertexToConvexHull(i);
 	}
 }
 
-void Triangulation::CalculateBoundingBox()
+/*
+	Ajoute un point dans l'enveloppe convexe et la met à jour.
+
+	A FAIRE
+*/
+void Triangulation::AddVertexToConvexHull(int s)
 {
-	Vector3 min = pointsList[0].Point();
-	Vector3 max = pointsList[0].Point();
-
-	for (int i = 1; i < pointsList.size(); ++i)
-	{
-		if (pointsList[i].Point().getX() < min.getX())
-			min.setX(pointsList[i].Point().getX());
-
-		if (pointsList[i].Point().getY() < min.getY())
-			min.setY(pointsList[i].Point().getY());
-
-		if (pointsList[i].Point().getZ() < min.getZ())
-			min.setZ(pointsList[i].Point().getZ());
-
-		if (pointsList[i].Point().getX() > max.getX())
-			max.setX(pointsList[i].Point().getX());
-
-		if (pointsList[i].Point().getY() > max.getY())
-			max.setY(pointsList[i].Point().getY());
-
-		if (pointsList[i].Point().getZ() > max.getZ())
-			max.setZ(pointsList[i].Point().getZ());
-	}
-	aabb.SetMinAABB(min - Vector3(0.5f));
-	aabb.SetMaxAABB(max + Vector3(0.5f));
+	// TODO
 }
 
+/*
+	Crée une face avec les indices des vertices.
+*/
 int Triangulation::CreateFace(int iA, int iB, int iC)
 {
 	Vector3 a = vertices[1].Point() - vertices[0].Point();
@@ -413,6 +446,9 @@ int Triangulation::CreateFace(int iA, int iB, int iC)
 	return faces.size() - 1;
 }
 
+/*
+	Retourne la face dont le vertices en paramètre fait partit.
+*/
 int Triangulation::FindFace(Vertex v)
 {
 	for (int i = 0; i < faces.size(); i++)
@@ -423,6 +459,9 @@ int Triangulation::FindFace(Vertex v)
 	return -1;
 }
 
+/*
+	Divise une face en trois nouvelles faces à partir du vertice.
+*/
 void Triangulation::SplitFace(int f, int s)
 {
 	Face face = faces[f];
@@ -474,6 +513,9 @@ void Triangulation::SplitFace(int f, int s)
 	facesModified.push_back(idFaceC);
 }
 
+/*
+	Retourne l'edge entre les deux faces en paramètres.
+*/
 void Triangulation::FlipEdge(int fA, int fB)
 {
 	Face faceA = faces[fA];
@@ -524,12 +566,19 @@ void Triangulation::FlipEdge(int fA, int fB)
 }
 /* Fonctions utilitaires */
 
+
 /* Prédicats */
+/*
+	Permet de dire de quel côté se trouve un vertice par rapport à une droite.
+*/
 double Triangulation::VertexSideLine(Vector3 p1, Vector3 p2, Vector3 p)
 {
 	return (p.getX() - p1.getX()) * (p2.getY() - p1.getY()) - (p.getY() - p1.getY()) * (p2.getX() - p1.getX());
 }
 
+/*
+	Permet de dire si un vertice est dans une face.
+*/
 bool Triangulation::IsInFace(Face f, Vector3 p)
 {
 	Vector3 p0 = vertices[f.VertexIndex(0)].Point();
@@ -548,6 +597,9 @@ bool Triangulation::IsInFace(Face f, Vector3 p)
 		return false;
 }
 
+/*
+	Permet de dire si un vertice est dans le cercle circonscrit à la face.
+*/
 bool Triangulation::IsInCircumcircle(int f, Vector3 s)
 {
 	Face face = faces[f];
@@ -577,7 +629,10 @@ bool Triangulation::IsInCircumcircle(int f, Vector3 s)
 	return false;
 }
 
-bool Triangulation::isTrianglesConvex(int fA, int fB)
+/*
+	Permet de dire si deux triangles sont convexes.
+*/
+bool Triangulation::IsTrianglesConvex(int fA, int fB)
 {
 	Face faceA = faces[fA];
 	Face faceB = faces[fB];
@@ -594,32 +649,33 @@ bool Triangulation::isTrianglesConvex(int fA, int fB)
 	int idVertex3 = faceB.VertexIndex((localFaceB + 1) % 3);
 
 	Vertex sA = vertices[idVertex0];
-	Vertex s = vertices[idVertex2];
 	Vertex sB = vertices[idVertex1];
+	Vertex s = vertices[idVertex2];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
 		return false;
 
 	sA = vertices[idVertex2];
-	s = vertices[idVertex1];
 	sB = vertices[idVertex3];
+	s = vertices[idVertex1];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
 		return false;
 
 	sA = vertices[idVertex1];
-	s = vertices[idVertex3];
 	sB = vertices[idVertex0];
+	s = vertices[idVertex3];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
 		return false;
 
 	sA = vertices[idVertex3];
-	s = vertices[idVertex0];
 	sB = vertices[idVertex2];
+	s = vertices[idVertex0];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
 		return false;
 
 	return true;
 }
 /* Prédicats */
+
 
 /* Itérateurs */
 FacesIterator Triangulation::BeginFace()
@@ -688,6 +744,7 @@ Vertex VerticesIterator::operator*()
 	return *sommet;
 }
 /* Itérateurs */
+
 
 /* Setteurs & Getteurs */
 int Face::VertexIndex(int s) const

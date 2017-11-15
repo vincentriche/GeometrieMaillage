@@ -24,6 +24,9 @@
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
          <widget class="QPushButton" name="button1">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
            <string>Toggle Wireframe</string>
           </property>

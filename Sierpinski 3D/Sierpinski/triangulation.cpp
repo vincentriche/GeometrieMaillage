@@ -11,7 +11,6 @@ Triangulation::Triangulation()
 {
 	srand(time(NULL));
 	color.InitColors();
-	renderMode = GL_LINES;
 }
 
 void Triangulation::draw()
@@ -20,9 +19,9 @@ void Triangulation::draw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glLineWidth(1.0f);
-	glBegin(renderMode);
-	if (renderMode == GL_LINES)
+	if (isWireframe == true)
 	{
+		glBegin(GL_LINES);
 		for (int i = 0; i < faces.size(); i++)
 		{
 			Vector3 c = color.GetColor(i);
@@ -37,8 +36,9 @@ void Triangulation::draw()
 			glVertex3f(vertices[faces[i].VertexIndex(0)].Point().getX(), vertices[faces[i].VertexIndex(0)].Point().getY(), vertices[faces[i].VertexIndex(0)].Point().getZ());
 		}
 	}
-	else if (renderMode == GL_TRIANGLES)
+	else
 	{
+		glBegin(GL_TRIANGLES);
 		for (int i = 0; i < faces.size(); i++)
 		{
 			Vector3 c = color.GetColor(i);
@@ -96,21 +96,24 @@ void Triangulation::draw()
 	}
 }
 
-/* Fonctions principales */
 /*
-	Triangulation Naive à partir d'un fichier de points : Initilisation des premières faces et ajout des points.
+	Triangulation Naive : Initilisation des premières faces et ajout des points à partir d'un fichier ou pas.
 
 	Pas de convex hull. On crée un quad qui sert de bounding box pour contenir tous les futures points.
+	Si pas de fichier, on crée une BB et les points seront ajouté par l'utilisateur avec la souris seulement dedans.
 */
-void Triangulation::NaiveFileTriangulation(QString f)
+void Triangulation::NaiveTriangulation(QString f)
 {
-	isOffFile = false;
+	useTriangulationAlgorithms = true;
 	filename = f;
 	pointsList.clear();
 	vertices.clear();
 	faces.clear();
 
-	ReadPointsFile(filename);
+	if (filename != NULL)
+		ReadPointsFile(filename);
+	else
+		aabb = AABB(Vector3(-1.0, -1.0, 0.0), Vector3(1.0, 1.0, 0.0));
 
 	float offset = 2.0f;
 	Vector3 min = aabb.GetMinAABB();
@@ -124,37 +127,13 @@ void Triangulation::NaiveFileTriangulation(QString f)
 
 	faces[0].FaceIndex(2, 1);
 	faces[1].FaceIndex(1, 0);
-
-	for (int i = 0; i < pointsList.size(); i++)
-		AddVertex(pointsList[i]);
-	DelaunayLawson();
-}
-
-/*
-	Triangulation Naive : Initilisation des premières faces et ajout des points.
-
-	Pas de convex hull. On crée un quad qui sert de bounding box pour contenir tous les futures points.
-	On crée une BB et les points seront ajouté par l'utilisateur avec la souris seulement dedans.
-*/
-void Triangulation::NaiveTriangulation()
-{
-	isOffFile = false;
-	pointsList.clear();
-	vertices.clear();
-	faces.clear();
-
-	float offset = 2.0f;
-	Vector3 min = aabb.GetMinAABB();
-	Vector3 max = aabb.GetMaxAABB();
-	vertices.push_back(Vertex(Vector3(min.getX() - offset, min.getY() - offset, 0.0f)));
-	vertices.push_back(Vertex(Vector3(min.getX() - offset, max.getY() + offset, 0.0f)));
-	vertices.push_back(Vertex(Vector3(max.getX() + offset, min.getY() - offset, 0.0f)));
-	CreateFace(0, 1, 2);
-	vertices.push_back(Vertex(Vector3(max.getX() + offset, max.getY() + offset, 0.0f)));
-	CreateFace(1, 3, 2);
-
-	faces[0].FaceIndex(2, 1);
-	faces[1].FaceIndex(1, 0);
+	
+	if (filename != NULL)
+	{
+		for (int i = 0; i < pointsList.size(); i++)
+			AddVertex(pointsList[i]);
+		DelaunayLawson();
+	}
 }
 
 /*
@@ -162,7 +141,7 @@ void Triangulation::NaiveTriangulation()
 */
 void Triangulation::DelaunayLawson()
 {
-	if (isOffFile == true)
+	if (useTriangulationAlgorithms == false)
 		return;
 
 	facesModified.clear();
@@ -199,7 +178,7 @@ void Triangulation::DelaunayLawson()
 */
 void Triangulation::DelaunayLawsonIncremental()
 {
-	if (isOffFile == true)
+	if (useTriangulationAlgorithms == false)
 		return;
 
 	while (facesModified.empty() == false)
@@ -231,7 +210,7 @@ void Triangulation::DelaunayLawsonIncremental()
 */
 void Triangulation::Voronoi()
 {
-	if (isVoronoi == false || isOffFile == true)
+	if (isVoronoi == false || useTriangulationAlgorithms == false)
 		return;
 
 	if (isDelaunay == false)
@@ -269,7 +248,7 @@ void Triangulation::Voronoi()
 */
 void Triangulation::AddVoronoi()
 {
-	if (voronoisVertices.size() == 0 || isOffFile == true)
+	if (voronoisVertices.size() == 0 || useTriangulationAlgorithms == false)
 		return;
 
 	for (int i = 0; i < voronoisVertices.size(); i++)
@@ -309,7 +288,7 @@ void Triangulation::ReadPointsFile(QString filename)
 		}
 	}
 	inputFile.close();
-	CalculateBoundingBox(pointsList);
+	aabb.CalculateBoundingBox(pointsList);
 }
 
 /*
@@ -317,7 +296,7 @@ void Triangulation::ReadPointsFile(QString filename)
 */
 void Triangulation::ReadOffFile(QString filename)
 {
-	isOffFile = true;
+	useTriangulationAlgorithms = false;
 	QFile inputFile(filename);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -348,7 +327,7 @@ void Triangulation::ReadOffFile(QString filename)
 		}
 	}
 	inputFile.close();
-	CalculateBoundingBox(vertices);
+	aabb.CalculateBoundingBox(vertices);
 }
 
 /*
@@ -394,10 +373,11 @@ void Triangulation::Reset()
 	faces.clear();
 	facesModified.clear();
 	voronoisVertices.clear();
+	isWireframe = true;
 	isDelaunay = false;
 	isVoronoi = false;
 	isCrust = false;
-	isOffFile = false;
+	useTriangulationAlgorithms = false;
 }
 
 /*
@@ -441,38 +421,6 @@ void Triangulation::GenerateCube()
 	// Face dessous
 	faces.push_back(Face(0, 3, 7));
 	faces.push_back(Face(7, 4, 0));
-}
-
-/*
-	Calcule la bounding box de la liste de points à traiter.
-*/
-void Triangulation::CalculateBoundingBox(QVector<Vertex> list)
-{
-	Vector3 min = list[0].Point();
-	Vector3 max = list[0].Point();
-
-	for (int i = 1; i < list.size(); ++i)
-	{
-		if (list[i].Point().getX() < min.getX())
-			min.setX(list[i].Point().getX());
-
-		if (list[i].Point().getY() < min.getY())
-			min.setY(list[i].Point().getY());
-
-		if (list[i].Point().getZ() < min.getZ())
-			min.setZ(list[i].Point().getZ());
-
-		if (list[i].Point().getX() > max.getX())
-			max.setX(list[i].Point().getX());
-
-		if (list[i].Point().getY() > max.getY())
-			max.setY(list[i].Point().getY());
-
-		if (list[i].Point().getZ() > max.getZ())
-			max.setZ(list[i].Point().getZ());
-	}
-	aabb.GetMinAABB() = min;
-	aabb.GetMaxAABB() = max;
 }
 
 /*
@@ -754,6 +702,39 @@ bool Triangulation::IsTrianglesConvex(int fA, int fB)
 /* Prédicats */
 
 
+/* Bouding Box */
+/*
+Calcule la bounding box de la liste de points à traiter.
+*/
+void AABB::CalculateBoundingBox(QVector<Vertex> list)
+{
+	Vector3 min = list[0].Point();
+	Vector3 max = list[0].Point();
+
+	for (int i = 1; i < list.size(); ++i)
+	{
+		if (list[i].Point().getX() < min.getX())
+			min.setX(list[i].Point().getX());
+
+		if (list[i].Point().getY() < min.getY())
+			min.setY(list[i].Point().getY());
+
+		if (list[i].Point().getZ() < min.getZ())
+			min.setZ(list[i].Point().getZ());
+
+		if (list[i].Point().getX() > max.getX())
+			max.setX(list[i].Point().getX());
+
+		if (list[i].Point().getY() > max.getY())
+			max.setY(list[i].Point().getY());
+
+		if (list[i].Point().getZ() > max.getZ())
+			max.setZ(list[i].Point().getZ());
+	}
+}
+/* Bouding Box */
+
+
 /* Itérateurs */
 FacesIterator Triangulation::BeginFace()
 {
@@ -890,10 +871,5 @@ int Face::LocalFaceIndex(int f)
 		return 2;
 	else
 		return -1;
-}
-
-void Triangulation::SetGLRenderMode(GLenum m)
-{
-	renderMode = m;
 }
 /* Setteurs & Getteurs */

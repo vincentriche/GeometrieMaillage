@@ -27,6 +27,7 @@ public:
 	void Voronoi();
 	void AddVoronoi();
 	void Crust();
+	void UpdateButtons();
 
 private:
 	Ui::MainWindow *ui;

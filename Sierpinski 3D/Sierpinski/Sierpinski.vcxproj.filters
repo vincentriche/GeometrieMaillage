@@ -69,9 +69,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aabb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gasket.h">
       <Filter>Header Files</Filter>
     </ClInclude>

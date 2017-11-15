@@ -33,9 +33,9 @@ void GLDisplay::resizeGL(int w, int h)
 
 	glViewport(0, 0, w, h);
 
-	glLoadIdentity();
-	glOrtho((float)mesh.AABB().GetMinAABB().getX(), (float)mesh.AABB().GetMaxAABB().getX(),
-		(float)mesh.AABB().GetMinAABB().getY(), (float)mesh.AABB().GetMaxAABB().getY(),
+	//glLoadIdentity();
+	glOrtho((float)mesh.GetAABB().GetMinAABB().getX(), (float)mesh.GetAABB().GetMaxAABB().getX(),
+		(float)mesh.GetAABB().GetMinAABB().getY(), (float)mesh.GetAABB().GetMaxAABB().getY(),
 		-2.0f, 100.f);
 
 
@@ -62,7 +62,7 @@ void GLDisplay::mouseMoveEvent(QMouseEvent *event)
 */
 void GLDisplay::mousePressEvent(QMouseEvent *event)
 {
-	if (event == NULL || mesh.isOffFile == true)
+	if (event == NULL || mesh.useTriangulationAlgorithms == false)
 		return;
 
 	if (event->buttons() & Qt::LeftButton)
@@ -74,10 +74,10 @@ void GLDisplay::mousePressEvent(QMouseEvent *event)
 
 		pY = height() - pY;
 
-		double minX = (double)mesh.AABB().GetMinAABB().getX();
-		double maxX = (double)mesh.AABB().GetMaxAABB().getX();
-		double minY = (double)mesh.AABB().GetMinAABB().getY();
-		double maxY = (double)mesh.AABB().GetMaxAABB().getY();
+		double minX = (double)mesh.GetAABB().GetMinAABB().getX();
+		double maxX = (double)mesh.GetAABB().GetMaxAABB().getX();
+		double minY = (double)mesh.GetAABB().GetMinAABB().getY();
+		double maxY = (double)mesh.GetAABB().GetMaxAABB().getY();
 
 		double sizeX = (maxX - minX);
 		double sizeY = (maxY - minY);

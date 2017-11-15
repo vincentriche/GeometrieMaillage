@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->button8, SIGNAL(released()), this, SLOT(LoadOffFile()));
 	connect(ui->button9, SIGNAL(released()), this, SLOT(SaveOffFile()));
 	connect(ui->button10, SIGNAL(released()), this, SLOT(ResetAll()));
+
+	UpdateButtons();
 }
 
 MainWindow::~MainWindow()
@@ -27,45 +29,50 @@ MainWindow::~MainWindow()
 
 void MainWindow::ToggleWireframe()
 {
-	if(ui->openGLWidget->GetTriangulation().GetGLRenderMode() == GL_LINES)
-		ui->openGLWidget->GetTriangulation().SetGLRenderMode(GL_TRIANGLES);
-	else
-		ui->openGLWidget->GetTriangulation().SetGLRenderMode(GL_LINES);
+	ui->openGLWidget->GetTriangulation().ToggleWireframe();
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::DelaunayLawson()
 {
 	ui->openGLWidget->GetTriangulation().DelaunayLawson();
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::Voronoi()
 {
+
 	ui->openGLWidget->GetTriangulation().ToggleVoronoi();
 	if (ui->openGLWidget->GetTriangulation().isVoronoi == true)
 		ui->openGLWidget->GetTriangulation().Voronoi();
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::AddVoronoi()
 {
 	ui->openGLWidget->GetTriangulation().AddVoronoi();
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::Crust()
 {
 	ui->openGLWidget->GetTriangulation().ToggleCrust();
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::CreateTriangulation()
 {
+	QString fileName = "";
 	ui->openGLWidget->GetTriangulation().Reset();
-	ui->openGLWidget->GetTriangulation().NaiveTriangulation();
+	ui->openGLWidget->GetTriangulation().NaiveTriangulation(fileName);
 	ui->openGLWidget->resizeGL(width(), height());
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::LoadPointsFile()
@@ -74,11 +81,12 @@ void MainWindow::LoadPointsFile()
 
 	if (fileName == NULL)
 		return;
-	
+
 	ui->openGLWidget->GetTriangulation().Reset();
-	ui->openGLWidget->GetTriangulation().NaiveFileTriangulation(fileName);
+	ui->openGLWidget->GetTriangulation().NaiveTriangulation(fileName);
 	ui->openGLWidget->resizeGL(width(), height());
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::LoadOffFile()
@@ -92,6 +100,7 @@ void MainWindow::LoadOffFile()
 	ui->openGLWidget->GetTriangulation().ReadOffFile(fileName);
 	ui->openGLWidget->resizeGL(width(), height());
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::SaveOffFile()
@@ -99,6 +108,7 @@ void MainWindow::SaveOffFile()
 	ui->openGLWidget->GetTriangulation().SaveOffFile();
 	ui->openGLWidget->resizeGL(width(), height());
 	ui->openGLWidget->update();
+	UpdateButtons();
 }
 
 void MainWindow::ResetAll()
@@ -106,4 +116,14 @@ void MainWindow::ResetAll()
 	ui->openGLWidget->GetTriangulation().Reset();
 	ui->openGLWidget->resizeGL(width(), height());
 	ui->openGLWidget->update();
+	UpdateButtons();
+}
+
+void MainWindow::UpdateButtons()
+{
+	bool b = ui->openGLWidget->GetTriangulation().useTriangulationAlgorithms;
+	ui->button2->setDisabled(!b);
+	ui->button3->setDisabled(!b);
+	ui->button4->setDisabled(!b);
+	ui->button5->setDisabled(!b);
 }

@@ -77,6 +77,7 @@ public:
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         button1 = new QPushButton(centralWidget);
         button1->setObjectName(QStringLiteral("button1"));
+        button1->setStyleSheet(QStringLiteral(""));
 
         gridLayout->addWidget(button1, 0, 1, 1, 1);
 

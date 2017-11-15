@@ -7,11 +7,11 @@
 #include <GL/gl.h>
 #include <QVector>
 #include <QVector3D>
-
-#include "aabb.h"
+#include "utilities.h"
 
 class FacesIterator;
 class VerticesIterator;
+class AABB;
 
 class Vertex
 {
@@ -28,6 +28,25 @@ public:
 	Vector3& Point() { return p; }
 	int& AdjacentFace() { return adjacentFace; }
 	bool& IsVoronoi() { return isVoronoi; }
+};
+
+/* Bounding Box */
+class AABB
+{
+private:
+	Vector3 minAABB;
+	Vector3 maxAABB;
+
+public:
+	AABB() {  }
+	AABB(Vector3 v1, Vector3 v2) : minAABB(v1), maxAABB(v2) { }
+
+	void SetMinAABB(Vector3 v) { minAABB = v; }
+	void SetMaxAABB(Vector3 v) { maxAABB = v; }
+	Vector3 GetMinAABB() { return minAABB; }
+	Vector3 GetMaxAABB() { return maxAABB; }
+
+	void CalculateBoundingBox(QVector<Vertex> list);
 };
 
 struct Edge
@@ -106,22 +125,21 @@ private:
 	QVector<Vertex> voronoisVertices;
 
 	AABB aabb;
-	GLenum renderMode;
 	Color color;
 	QString filename;
 
 public:
+	bool isWireframe = true;
 	bool isDelaunay = false;
 	bool isVoronoi = false;
 	bool isCrust = false;
-	bool isOffFile = false;
+	bool useTriangulationAlgorithms = false;
 
 	Triangulation();
 	void draw();
 
 	/* Fonctions principales */
-	void NaiveFileTriangulation(QString filename);
-	void NaiveTriangulation();
+	void NaiveTriangulation(QString filename);
 	void DelaunayLawson();
 	void DelaunayLawsonIncremental();
 	void Voronoi();
@@ -133,7 +151,6 @@ public:
 	void ReadOffFile(QString filename);
 	void SaveOffFile();
 	void GenerateCube();
-	void CalculateBoundingBox(QVector<Vertex> list);
 	void AddVertex(Vertex v);
 	void AddVertexToConvexHull(int s);
 	int CreateFace(int iA, int iB, int iC);
@@ -155,13 +172,12 @@ public:
 	Vertex EndVertex();
 
 	/* Getteurs / Setteurs */
-	void SetGLRenderMode(GLenum m);
+	void ToggleWireframe() { isWireframe = !isWireframe; }
 	void ToggleVoronoi() { isVoronoi = !isVoronoi; }
 	void ToggleCrust() { isCrust = !isCrust; }
-	GLenum GetGLRenderMode() { return renderMode; }
 	QVector<Vertex> Vertices() { return vertices; }
 	QVector<Face> Faces() { return faces; }
-	AABB AABB() { return aabb; }
+	AABB GetAABB() { return aabb; }
 };
 
 /* Itérateurs */

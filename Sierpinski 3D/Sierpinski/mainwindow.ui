@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>894</width>
-    <height>812</height>
+    <width>895</width>
+    <height>870</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,91 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
+    <item row="2" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="button1">
+          <property name="text">
+           <string>Toggle Wireframe</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="button10">
+          <property name="text">
+           <string>Reset All</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="button7">
+          <property name="text">
+           <string>Load Points File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="button8">
+          <property name="text">
+           <string>Load Off File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="button6">
+          <property name="text">
+           <string>Create Triangulation</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="button9">
+          <property name="text">
+           <string>Save Triangulation (.OFF)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="button2">
+          <property name="text">
+           <string>Delaunay -  Lawson</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button3">
+          <property name="text">
+           <string>Toggle Voronoi</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button4">
+          <property name="text">
+           <string>Add Voronoi to Triangulation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button5">
+          <property name="text">
+           <string>Crust</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
     <item row="0" column="1">
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="1" column="0">
@@ -30,59 +115,44 @@
      </layout>
     </item>
     <item row="1" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>10</number>
-      </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QPushButton" name="button1">
-          <property name="text">
-           <string>Wireframe</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="button2">
-          <property name="text">
-           <string>Faces</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Utilities Functions</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QPushButton" name="button3">
-          <property name="text">
-           <string>Delaunay -  Lawson</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="button4">
-          <property name="text">
-           <string>Voronoi</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="button5">
-          <property name="text">
-           <string>Add Voronoi to Triangulation</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="button6">
-          <property name="text">
-           <string>Crust</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Triangulation Functions</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -93,7 +163,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>894</width>
+     <width>895</width>
      <height>21</height>
     </rect>
    </property>

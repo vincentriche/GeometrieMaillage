@@ -11,12 +11,10 @@ private:
 	Vector3 maxAABB;
 
 public:
-	AABB() { minAABB = Vector3(-20.0, -20.0, 0.0f); maxAABB = Vector3(20.0, 20.0, 0.0f); }
+	AABB() { }
 
-	void SetMinAABB(Vector3 m) { minAABB = m; }
-	void SetMaxAABB(Vector3 m) { maxAABB = m; }
-	Vector3 GetMinAABB() { return minAABB; }
-	Vector3 GetMaxAABB() { return maxAABB; }
+	Vector3& GetMinAABB() { return minAABB; }
+	Vector3& GetMaxAABB() { return maxAABB; }
 };
 
 #endif // BOUNDINGBOX_H

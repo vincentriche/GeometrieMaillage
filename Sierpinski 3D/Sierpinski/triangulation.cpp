@@ -12,8 +12,6 @@ Triangulation::Triangulation()
 	srand(time(NULL));
 	color.InitColors();
 	renderMode = GL_LINES;
-
-	NaiveTriangulation();
 }
 
 void Triangulation::draw()
@@ -100,21 +98,19 @@ void Triangulation::draw()
 
 /* Fonctions principales */
 /*
-	Triangulation Navie : Initilisation des premières faces et ajout des points.
+	Triangulation Naive à partir d'un fichier de points : Initilisation des premières faces et ajout des points.
 
 	Pas de convex hull. On crée un quad qui sert de bounding box pour contenir tous les futures points.
-	Si ReadFile(filename) n'est pas appelé, on crée la BB et les points seront ajouté par l'utilisateur avec la souris.
 */
-void Triangulation::NaiveTriangulation()
+void Triangulation::NaiveFileTriangulation(QString f)
 {
+	isOffFile = false;
+	filename = f;
 	pointsList.clear();
 	vertices.clear();
 	faces.clear();
 
-	ReadPointsFile("Files\\hand.xy");
-	//ReadPointsFile("Files\\colimacon.xy");
-	//ReadPointsFile("Files\\star_uniform.xy");
-	CalculateBoundingBox();
+	ReadPointsFile(filename);
 
 	float offset = 2.0f;
 	Vector3 min = aabb.GetMinAABB();
@@ -129,12 +125,36 @@ void Triangulation::NaiveTriangulation()
 	faces[0].FaceIndex(2, 1);
 	faces[1].FaceIndex(1, 0);
 
-	if (pointsList.size() > 0)
-	{
-		for (int i = 0; i < pointsList.size(); i++)
-			AddVertex(pointsList[i]);
-		DelaunayLawson();
-	}
+	for (int i = 0; i < pointsList.size(); i++)
+		AddVertex(pointsList[i]);
+	DelaunayLawson();
+}
+
+/*
+	Triangulation Naive : Initilisation des premières faces et ajout des points.
+
+	Pas de convex hull. On crée un quad qui sert de bounding box pour contenir tous les futures points.
+	On crée une BB et les points seront ajouté par l'utilisateur avec la souris seulement dedans.
+*/
+void Triangulation::NaiveTriangulation()
+{
+	isOffFile = false;
+	pointsList.clear();
+	vertices.clear();
+	faces.clear();
+
+	float offset = 2.0f;
+	Vector3 min = aabb.GetMinAABB();
+	Vector3 max = aabb.GetMaxAABB();
+	vertices.push_back(Vertex(Vector3(min.getX() - offset, min.getY() - offset, 0.0f)));
+	vertices.push_back(Vertex(Vector3(min.getX() - offset, max.getY() + offset, 0.0f)));
+	vertices.push_back(Vertex(Vector3(max.getX() + offset, min.getY() - offset, 0.0f)));
+	CreateFace(0, 1, 2);
+	vertices.push_back(Vertex(Vector3(max.getX() + offset, max.getY() + offset, 0.0f)));
+	CreateFace(1, 3, 2);
+
+	faces[0].FaceIndex(2, 1);
+	faces[1].FaceIndex(1, 0);
 }
 
 /*
@@ -142,6 +162,9 @@ void Triangulation::NaiveTriangulation()
 */
 void Triangulation::DelaunayLawson()
 {
+	if (isOffFile == true)
+		return;
+
 	facesModified.clear();
 	for (int i = 0; i < faces.size(); i++)
 		facesModified.push_back(i);
@@ -176,6 +199,9 @@ void Triangulation::DelaunayLawson()
 */
 void Triangulation::DelaunayLawsonIncremental()
 {
+	if (isOffFile == true)
+		return;
+
 	while (facesModified.empty() == false)
 	{
 		int f = facesModified[0];
@@ -205,7 +231,7 @@ void Triangulation::DelaunayLawsonIncremental()
 */
 void Triangulation::Voronoi()
 {
-	if (isVoronoi == false)
+	if (isVoronoi == false || isOffFile == true)
 		return;
 
 	if (isDelaunay == false)
@@ -243,7 +269,7 @@ void Triangulation::Voronoi()
 */
 void Triangulation::AddVoronoi()
 {
-	if (voronoisVertices.size() == 0)
+	if (voronoisVertices.size() == 0 || isOffFile == true)
 		return;
 
 	for (int i = 0; i < voronoisVertices.size(); i++)
@@ -258,17 +284,19 @@ void Triangulation::AddVoronoi()
 
 /* Fonctions utilitaires */
 /*
-	Lit le fichier en paramètres et remplit le Qvector de points à traiter.
+	Lit le fichier en paramètre et remplit le Qvector de points à traiter.
 */
-void Triangulation::ReadPointsFile(const char* filename)
+void Triangulation::ReadPointsFile(QString filename)
 {
 	pointsList.clear();
+
+	if (filename == NULL)
+		return;
 
 	QFile inputFile(filename);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
 		QTextStream in(&inputFile);
-
 		// Première ligne
 		QString line = in.readLine();
 		while (!line.isNull())
@@ -279,16 +307,18 @@ void Triangulation::ReadPointsFile(const char* filename)
 				pointsList.push_back(Vertex(Vector3(fields[0].toDouble(), fields[1].toDouble(), 0.0)));
 
 		}
-		inputFile.close();
 	}
+	inputFile.close();
+	CalculateBoundingBox(pointsList);
 }
 
 /*
 	Lit le fichier Off en paramètre et en remplit les Qvector de faces et vertices.
 */
-void Triangulation::ReadOffFile()
+void Triangulation::ReadOffFile(QString filename)
 {
-	QFile inputFile("queen.off");
+	isOffFile = true;
+	QFile inputFile(filename);
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
 		QTextStream in(&inputFile);
@@ -316,8 +346,58 @@ void Triangulation::ReadOffFile()
 			QStringList  fields = line.split(" ");
 			faces.push_back(Face(fields[1].toInt(), fields[2].toInt(), fields[3].toInt()));
 		}
-		inputFile.close();
 	}
+	inputFile.close();
+	CalculateBoundingBox(vertices);
+}
+
+/*
+	Sauvegarde la triangulation dans un fichier Off.
+*/
+void Triangulation::SaveOffFile()
+{
+	QFile inputFile("queen.off");
+
+	QString namefile;
+	if (filename.isEmpty())
+		namefile = "Files\TriangulationCustom.off";
+	else
+	{
+		QStringList  fields = filename.split(".");
+		namefile = fields[0] + ".off";
+	}
+
+	QFile file(namefile);
+	if (file.open(QIODevice::ReadWrite)) {
+		QTextStream stream(&file);
+
+		stream << "OFF" << endl;
+		stream << vertices.size() << " " << faces.size() << endl;
+
+		for (int i = 0; i < vertices.size(); i++)
+			stream << vertices[i].Point().getX() << " " << vertices[i].Point().getY() << " " << vertices[i].Point().getZ() << endl;
+
+
+		for (int i = 0; i < faces.size(); i++)
+			stream << 3 << " " << faces[i].VertexIndex(0) << " " << faces[i].VertexIndex(1) << " " << faces[i].VertexIndex(2) << endl;
+	}
+	file.close();
+}
+
+/*
+	Clear all Qvectors and reset booleans to false.
+*/
+void Triangulation::Reset()
+{
+	pointsList.clear();
+	vertices.clear();
+	faces.clear();
+	facesModified.clear();
+	voronoisVertices.clear();
+	isDelaunay = false;
+	isVoronoi = false;
+	isCrust = false;
+	isOffFile = false;
 }
 
 /*
@@ -364,38 +444,35 @@ void Triangulation::GenerateCube()
 }
 
 /*
-	Calcule la bounding box de la liste de points à traiter points.
+	Calcule la bounding box de la liste de points à traiter.
 */
-void Triangulation::CalculateBoundingBox()
+void Triangulation::CalculateBoundingBox(QVector<Vertex> list)
 {
-	if (pointsList.size() > 0)
+	Vector3 min = list[0].Point();
+	Vector3 max = list[0].Point();
+
+	for (int i = 1; i < list.size(); ++i)
 	{
-		Vector3 min = pointsList[0].Point();
-		Vector3 max = pointsList[0].Point();
+		if (list[i].Point().getX() < min.getX())
+			min.setX(list[i].Point().getX());
 
-		for (int i = 1; i < pointsList.size(); ++i)
-		{
-			if (pointsList[i].Point().getX() < min.getX())
-				min.setX(pointsList[i].Point().getX());
+		if (list[i].Point().getY() < min.getY())
+			min.setY(list[i].Point().getY());
 
-			if (pointsList[i].Point().getY() < min.getY())
-				min.setY(pointsList[i].Point().getY());
+		if (list[i].Point().getZ() < min.getZ())
+			min.setZ(list[i].Point().getZ());
 
-			if (pointsList[i].Point().getZ() < min.getZ())
-				min.setZ(pointsList[i].Point().getZ());
+		if (list[i].Point().getX() > max.getX())
+			max.setX(list[i].Point().getX());
 
-			if (pointsList[i].Point().getX() > max.getX())
-				max.setX(pointsList[i].Point().getX());
+		if (list[i].Point().getY() > max.getY())
+			max.setY(list[i].Point().getY());
 
-			if (pointsList[i].Point().getY() > max.getY())
-				max.setY(pointsList[i].Point().getY());
-
-			if (pointsList[i].Point().getZ() > max.getZ())
-				max.setZ(pointsList[i].Point().getZ());
-		}
-		aabb.SetMinAABB(min - Vector3(0.5f));
-		aabb.SetMaxAABB(max + Vector3(0.5f));
+		if (list[i].Point().getZ() > max.getZ())
+			max.setZ(list[i].Point().getZ());
 	}
+	aabb.GetMinAABB() = min;
+	aabb.GetMaxAABB() = max;
 }
 
 /*

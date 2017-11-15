@@ -16,6 +16,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -33,17 +34,24 @@ public:
     QAction *actionSubmenu;
     QWidget *centralWidget;
     QGridLayout *gridLayout_2;
-    QGridLayout *gridLayout_3;
-    GLDisplay *openGLWidget;
     QHBoxLayout *horizontalLayout;
-    QVBoxLayout *verticalLayout_2;
+    QGridLayout *gridLayout;
     QPushButton *button1;
-    QPushButton *button2;
+    QPushButton *button10;
+    QPushButton *button7;
+    QPushButton *button8;
+    QPushButton *button6;
+    QPushButton *button9;
     QVBoxLayout *verticalLayout;
+    QPushButton *button2;
     QPushButton *button3;
     QPushButton *button4;
     QPushButton *button5;
-    QPushButton *button6;
+    QGridLayout *gridLayout_3;
+    GLDisplay *openGLWidget;
+    QHBoxLayout *horizontalLayout_3;
+    QLabel *label_2;
+    QLabel *label;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -52,7 +60,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(894, 812);
+        MainWindow->resize(895, 870);
         actionSubmenu = new QAction(MainWindow);
         actionSubmenu->setObjectName(QStringLiteral("actionSubmenu"));
         centralWidget = new QWidget(MainWindow);
@@ -61,40 +69,53 @@ public:
         gridLayout_2->setSpacing(6);
         gridLayout_2->setContentsMargins(11, 11, 11, 11);
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
-        gridLayout_3 = new QGridLayout();
-        gridLayout_3->setSpacing(6);
-        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
-        openGLWidget = new GLDisplay(centralWidget);
-        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
-        openGLWidget->setMinimumSize(QSize(400, 650));
-
-        gridLayout_3->addWidget(openGLWidget, 1, 0, 1, 1);
-
-
-        gridLayout_2->addLayout(gridLayout_3, 0, 1, 1, 1);
-
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(10);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        verticalLayout_2 = new QVBoxLayout();
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        gridLayout = new QGridLayout();
+        gridLayout->setSpacing(6);
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
         button1 = new QPushButton(centralWidget);
         button1->setObjectName(QStringLiteral("button1"));
 
-        verticalLayout_2->addWidget(button1);
+        gridLayout->addWidget(button1, 0, 1, 1, 1);
 
-        button2 = new QPushButton(centralWidget);
-        button2->setObjectName(QStringLiteral("button2"));
+        button10 = new QPushButton(centralWidget);
+        button10->setObjectName(QStringLiteral("button10"));
 
-        verticalLayout_2->addWidget(button2);
+        gridLayout->addWidget(button10, 2, 1, 1, 1);
+
+        button7 = new QPushButton(centralWidget);
+        button7->setObjectName(QStringLiteral("button7"));
+
+        gridLayout->addWidget(button7, 1, 0, 1, 1);
+
+        button8 = new QPushButton(centralWidget);
+        button8->setObjectName(QStringLiteral("button8"));
+
+        gridLayout->addWidget(button8, 2, 0, 1, 1);
+
+        button6 = new QPushButton(centralWidget);
+        button6->setObjectName(QStringLiteral("button6"));
+
+        gridLayout->addWidget(button6, 0, 0, 1, 1);
+
+        button9 = new QPushButton(centralWidget);
+        button9->setObjectName(QStringLiteral("button9"));
+
+        gridLayout->addWidget(button9, 1, 1, 1, 1);
 
 
-        horizontalLayout->addLayout(verticalLayout_2);
+        horizontalLayout->addLayout(gridLayout);
 
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(6);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        button2 = new QPushButton(centralWidget);
+        button2->setObjectName(QStringLiteral("button2"));
+
+        verticalLayout->addWidget(button2);
+
         button3 = new QPushButton(centralWidget);
         button3->setObjectName(QStringLiteral("button3"));
 
@@ -110,21 +131,58 @@ public:
 
         verticalLayout->addWidget(button5);
 
-        button6 = new QPushButton(centralWidget);
-        button6->setObjectName(QStringLiteral("button6"));
-
-        verticalLayout->addWidget(button6);
-
 
         horizontalLayout->addLayout(verticalLayout);
 
 
-        gridLayout_2->addLayout(horizontalLayout, 1, 1, 1, 1);
+        gridLayout_2->addLayout(horizontalLayout, 2, 1, 1, 1);
+
+        gridLayout_3 = new QGridLayout();
+        gridLayout_3->setSpacing(6);
+        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
+        openGLWidget = new GLDisplay(centralWidget);
+        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
+        openGLWidget->setMinimumSize(QSize(400, 650));
+
+        gridLayout_3->addWidget(openGLWidget, 1, 0, 1, 1);
+
+
+        gridLayout_2->addLayout(gridLayout_3, 0, 1, 1, 1);
+
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        label_2 = new QLabel(centralWidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+        QFont font;
+        font.setPointSize(10);
+        font.setBold(true);
+        font.setWeight(75);
+        label_2->setFont(font);
+        label_2->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout_3->addWidget(label_2);
+
+        label = new QLabel(centralWidget);
+        label->setObjectName(QStringLiteral("label"));
+        QFont font1;
+        font1.setPointSize(10);
+        font1.setBold(true);
+        font1.setItalic(false);
+        font1.setWeight(75);
+        label->setFont(font1);
+        label->setAutoFillBackground(false);
+        label->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout_3->addWidget(label);
+
+
+        gridLayout_2->addLayout(horizontalLayout_3, 1, 1, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 894, 21));
+        menuBar->setGeometry(QRect(0, 0, 895, 21));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -142,12 +200,18 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", Q_NULLPTR));
         actionSubmenu->setText(QApplication::translate("MainWindow", "submenu", Q_NULLPTR));
-        button1->setText(QApplication::translate("MainWindow", "Wireframe", Q_NULLPTR));
-        button2->setText(QApplication::translate("MainWindow", "Faces", Q_NULLPTR));
-        button3->setText(QApplication::translate("MainWindow", "Delaunay -  Lawson", Q_NULLPTR));
-        button4->setText(QApplication::translate("MainWindow", "Voronoi", Q_NULLPTR));
-        button5->setText(QApplication::translate("MainWindow", "Add Voronoi to Triangulation", Q_NULLPTR));
-        button6->setText(QApplication::translate("MainWindow", "Crust", Q_NULLPTR));
+        button1->setText(QApplication::translate("MainWindow", "Toggle Wireframe", Q_NULLPTR));
+        button10->setText(QApplication::translate("MainWindow", "Reset All", Q_NULLPTR));
+        button7->setText(QApplication::translate("MainWindow", "Load Points File", Q_NULLPTR));
+        button8->setText(QApplication::translate("MainWindow", "Load Off File", Q_NULLPTR));
+        button6->setText(QApplication::translate("MainWindow", "Create Triangulation", Q_NULLPTR));
+        button9->setText(QApplication::translate("MainWindow", "Save Triangulation (.OFF)", Q_NULLPTR));
+        button2->setText(QApplication::translate("MainWindow", "Delaunay -  Lawson", Q_NULLPTR));
+        button3->setText(QApplication::translate("MainWindow", "Toggle Voronoi", Q_NULLPTR));
+        button4->setText(QApplication::translate("MainWindow", "Add Voronoi to Triangulation", Q_NULLPTR));
+        button5->setText(QApplication::translate("MainWindow", "Crust", Q_NULLPTR));
+        label_2->setText(QApplication::translate("MainWindow", "Utilities Functions", Q_NULLPTR));
+        label->setText(QApplication::translate("MainWindow", "Triangulation Functions", Q_NULLPTR));
     } // retranslateUi
 
 };

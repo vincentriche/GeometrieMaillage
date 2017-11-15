@@ -38,6 +38,7 @@ void GLDisplay::resizeGL(int w, int h)
 		(float)mesh.AABB().GetMinAABB().getY(), (float)mesh.AABB().GetMaxAABB().getY(),
 		-2.0f, 100.f);
 
+
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -61,7 +62,7 @@ void GLDisplay::mouseMoveEvent(QMouseEvent *event)
 */
 void GLDisplay::mousePressEvent(QMouseEvent *event)
 {
-	if (event == NULL)
+	if (event == NULL || mesh.isOffFile == true)
 		return;
 
 	if (event->buttons() & Qt::LeftButton)

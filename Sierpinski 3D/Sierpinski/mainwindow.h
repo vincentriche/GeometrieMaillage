@@ -17,8 +17,12 @@ public:
 	~MainWindow();
 
 	public slots:
-	void DrawWireframe();
-	void DrawFaces();
+	void CreateTriangulation();
+	void LoadPointsFile();
+	void LoadOffFile();
+	void SaveOffFile();
+	void ResetAll();
+	void ToggleWireframe();
 	void DelaunayLawson();
 	void Voronoi();
 	void AddVoronoi();

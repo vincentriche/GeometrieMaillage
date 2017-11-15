@@ -104,30 +104,36 @@ private:
 	QVector<Face> faces;
 	QVector<int> facesModified;
 	QVector<Vertex> voronoisVertices;
+
 	AABB aabb;
 	GLenum renderMode;
 	Color color;
+	QString filename;
 
 public:
 	bool isDelaunay = false;
 	bool isVoronoi = false;
 	bool isCrust = false;
+	bool isOffFile = false;
 
 	Triangulation();
 	void draw();
 
 	/* Fonctions principales */
+	void NaiveFileTriangulation(QString filename);
 	void NaiveTriangulation();
 	void DelaunayLawson();
 	void DelaunayLawsonIncremental();
 	void Voronoi();
 	void AddVoronoi();
+	void Reset();
 
 	/* Fonctions utilitaires */
-	void ReadPointsFile(const char* filename);
-	void ReadOffFile();
+	void ReadPointsFile(QString filename);
+	void ReadOffFile(QString filename);
+	void SaveOffFile();
 	void GenerateCube();
-	void CalculateBoundingBox();
+	void CalculateBoundingBox(QVector<Vertex> list);
 	void AddVertex(Vertex v);
 	void AddVertexToConvexHull(int s);
 	int CreateFace(int iA, int iB, int iC);

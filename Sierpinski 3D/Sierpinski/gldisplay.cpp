@@ -33,10 +33,13 @@ void GLDisplay::resizeGL(int w, int h)
 
 	glViewport(0, 0, w, h);
 
-	//glLoadIdentity();
-	glOrtho((float)mesh.GetAABB().GetMinAABB().getX(), (float)mesh.GetAABB().GetMaxAABB().getX(),
-		(float)mesh.GetAABB().GetMinAABB().getY(), (float)mesh.GetAABB().GetMaxAABB().getY(),
-		-2.0f, 100.f);
+	double minX = (double)mesh.GetAABB().GetMinAABB().getX();
+	double maxX = (double)mesh.GetAABB().GetMaxAABB().getX();
+	double minY = (double)mesh.GetAABB().GetMinAABB().getY();
+	double maxY = (double)mesh.GetAABB().GetMaxAABB().getY();
+
+	glLoadIdentity();
+	glOrtho(minX, maxX, minY, maxY, -2.0f, 100.f);
 
 
 	glMatrixMode(GL_MODELVIEW);
@@ -81,7 +84,7 @@ void GLDisplay::mousePressEvent(QMouseEvent *event)
 
 		double sizeX = (maxX - minX);
 		double sizeY = (maxY - minY);
-
+			
 
 		pX = pX / width() * sizeX + minX;
 		pY = pY / height() * sizeY + minY;

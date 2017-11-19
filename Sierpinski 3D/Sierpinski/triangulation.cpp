@@ -150,20 +150,20 @@ void Triangulation::DelaunayLawson()
 
 	while (facesModified.empty() == false)
 	{
-		int f = facesModified[0];
-		Face face = faces[f];
+		int fA = facesModified[0];
+		Face face = faces[fA];
 		facesModified.pop_front();
 		for (int j = 0; j < 3; j++)
 		{
 			int fB = face.FaceIndex(j);
-			if (fB == -1 || IsTrianglesConvex(f, fB) == false)
+			if (fB == -1 || IsTrianglesConvex(fA, fB) == false)
 				continue;
 
 			Face faceB = faces[fB];
-			Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(f))].Point();
-			if (IsInCircumcircle(f, v) == true)
+			Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(fA))].Point();
+			if (IsInCircumcircle(fA, v) == true)
 			{
-				FlipEdge(f, fB);
+				FlipEdge(fA, fB);
 				isDelaunay = false;
 			}
 		}
@@ -183,20 +183,20 @@ void Triangulation::DelaunayLawsonIncremental()
 
 	while (facesModified.empty() == false)
 	{
-		int f = facesModified[0];
-		Face face = faces[f];
+		int fA = facesModified[0];
+		Face face = faces[fA];
 		facesModified.pop_front();
 		for (int j = 0; j < 3; j++)
 		{
 			int fB = face.FaceIndex(j);
-			if (fB == -1 || IsTrianglesConvex(f, fB) == false)
+			if (fB == -1 || IsTrianglesConvex(fA, fB) == false)
 				continue;
 
 			Face faceB = faces[fB];
-			Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(f))].Point();
-			if (IsInCircumcircle(f, v) == true)
+			Vector3 v = vertices[faceB.VertexIndex(faceB.LocalFaceIndex(fA))].Point();
+			if (IsInCircumcircle(fA, v) == true)
 			{
-				FlipEdge(f, fB);
+				FlipEdge(fA, fB);
 			}
 		}
 	}
@@ -428,9 +428,9 @@ void Triangulation::GenerateCube()
 */
 void Triangulation::AddVertex(Vertex v)
 {
+	bool found = false;
 	int i = vertices.size();
 	vertices.push_back(v);
-	bool found = false;
 	for (int j = 0; j < faces.size(); j++)
 	{
 		if (IsInFace(faces[j], vertices[i].Point()) == true)
@@ -610,12 +610,10 @@ bool Triangulation::IsInFace(Face f, Vector3 p)
 	Vector3 p1 = vertices[f.VertexIndex(1)].Point();
 	Vector3 p2 = vertices[f.VertexIndex(2)].Point();
 
-	// Calculs des aires signées pour chaque arêtes du triangle et le pixel
 	double area01PX = 0.5 * ((p1.getX() - p0.getX()) * (p.getY() - p0.getY()) - (p.getX() - p0.getX()) * (p1.getY() - p0.getY()));
 	double area12PX = 0.5 * ((p2.getX() - p1.getX()) * (p.getY() - p1.getY()) - (p.getX() - p1.getX()) * (p2.getY() - p1.getY()));
 	double area20PX = 0.5 * ((p0.getX() - p2.getX()) * (p.getY() - p2.getY()) - (p.getX() - p2.getX()) * (p0.getY() - p2.getY()));
 
-	// Si pixel dans le triangle (aires signées positives), couleur du triangle
 	if (area01PX >= 0.0 && area12PX >= 0.0 && area20PX >= 0.0)
 		return true;
 	else
@@ -696,7 +694,6 @@ bool Triangulation::IsTrianglesConvex(int fA, int fB)
 	s = vertices[idVertex0];
 	if (VertexSideLine(sA.Point(), sB.Point(), s.Point()) <= 0.0f)
 		return false;
-
 	return true;
 }
 /* Prédicats */
@@ -800,6 +797,16 @@ void VerticesIterator::operator++()
 Vertex VerticesIterator::operator*()
 {
 	return *sommet;
+}
+
+const FacesCirculator& FacesCirculator::operator++()
+{
+	return *this;
+}
+
+const FacesCirculator& FacesCirculator::operator--()
+{
+	return *this;
 }
 /* Itérateurs */
 

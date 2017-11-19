@@ -228,20 +228,7 @@ public:
 	~FacesCirculator() { delete triangulation; }
 
 	const int operator*() { return currentFace; }
-	const FacesCirculator& operator++()
-	{
-		Face& face = triangulation->Faces()[currentFace];
-		int localVertex = face.LocalVertexIndex(currentVertex);
-		currentFace = face.FaceIndex((localVertex + 1) % 3);
-		return *this;
-	}
-	const FacesCirculator& operator--()
-	{
-		Face& face = triangulation->Faces()[currentFace];
-		int localVertex = face.LocalVertexIndex(currentVertex);
-		int index = localVertex == 0 ? 2 : localVertex - 1;
-		currentFace = face.FaceIndex(index);
-		return *this;
-	}
+	const FacesCirculator& operator++();
+	const FacesCirculator& operator--();
 };
 #endif // MESH_H

@@ -24,7 +24,6 @@ HEADERS  += mainwindow.h \
     gldisplay.h \
 	gasket.h \
     utilities.h \
-    aabb.h \
     triangulation.h
 
 FORMS    += mainwindow.ui

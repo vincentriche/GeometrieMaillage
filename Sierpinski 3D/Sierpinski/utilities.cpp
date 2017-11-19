@@ -1,5 +1,4 @@
 #include "utilities.h"
-#include <atlbase.h>
 
 /*
 	Calcul le produit vectoriel entre deux Vector3.
